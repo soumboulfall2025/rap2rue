@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { apiUrl } from "../utils/api";
 import BuyMusicButton from './BuyMusicButton';
 
 export default function Library() {
@@ -11,7 +12,7 @@ export default function Library() {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('/api/auth/library', {
+        const res = await fetch(apiUrl('/api/auth/library'), {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token'),
           },

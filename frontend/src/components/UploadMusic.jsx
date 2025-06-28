@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiUrl } from '../utils/api';
 
 export default function UploadMusic() {
   const [title, setTitle] = useState('');
@@ -29,8 +30,7 @@ export default function UploadMusic() {
     formData.append('cover', cover);
     formData.append('audio', audio);
     try {
-      // À remplacer par l’URL de ton backend
-      const res = await fetch('http://localhost:5000/api/music/upload', {
+      const res = await fetch(apiUrl('/api/music/upload'), {
         method: 'POST',
         body: formData,
         headers: {

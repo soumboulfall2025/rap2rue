@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { apiUrl } from "../utils/api";
 
 function MusicReviewForm({ musicId, onReviewAdded }) {
   const user = useSelector((state) => state.user.user);
@@ -13,7 +14,7 @@ function MusicReviewForm({ musicId, onReviewAdded }) {
     setLoading(true);
     setMsg("");
     try {
-      const res = await fetch(`/api/music/${musicId}/review`, {
+      const res = await fetch(apiUrl(`/api/music/${musicId}/review`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

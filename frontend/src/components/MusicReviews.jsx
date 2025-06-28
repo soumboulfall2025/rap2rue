@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiUrl } from "../utils/api";
 
 function MusicReviews({ musicId, refresh }) {
   const [reviews, setReviews] = useState([]);
@@ -8,7 +9,7 @@ function MusicReviews({ musicId, refresh }) {
     const fetchReviews = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/music/${musicId}/reviews`);
+        const res = await fetch(apiUrl(`/api/music/${musicId}/reviews`));
         const data = await res.json();
         if (res.ok) setReviews(data);
       } catch {}

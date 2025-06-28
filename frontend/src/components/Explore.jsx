@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { apiUrl } from '../utils/api';
 import BuyMusicButton from './BuyMusicButton';
 import MusicReviews from './MusicReviews';
 import MusicReviewForm from './MusicReviewForm';
@@ -16,7 +17,7 @@ export default function Explore() {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('http://localhost:5000/api/music');
+        const res = await fetch(apiUrl('/api/music'));
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Erreur serveur');
         setMusics(data);
@@ -32,7 +33,7 @@ export default function Explore() {
   const handleBuy = async (musicId) => {
     setBuyMsg('');
     try {
-      const res = await fetch(`http://localhost:5000/api/music/buy/${musicId}`, {
+      const res = await fetch(apiUrl(`/api/music/buy/${musicId}`), {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token'),

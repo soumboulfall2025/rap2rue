@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { apiUrl } from "../utils/api";
 import { useSelector } from 'react-redux';
 
 export default function ArtistDashboard() {
@@ -12,7 +13,7 @@ export default function ArtistDashboard() {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('/api/music/artist-dashboard', {
+        const res = await fetch(apiUrl('/api/music/artist-dashboard'), {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token'),
           },

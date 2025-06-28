@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { apiUrl } from "../utils/api";
 
 function BuyMusicButton({ music }) {
   const user = useSelector((state) => state.user.user);
@@ -8,7 +9,7 @@ function BuyMusicButton({ music }) {
   const handleBuy = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/payment/paydunya", {
+      const res = await fetch(apiUrl("/api/payment/paydunya"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
