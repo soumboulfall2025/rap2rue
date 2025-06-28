@@ -10,6 +10,7 @@ export default function Explore() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [buyMsg, setBuyMsg] = useState('');
+  const [refreshReviews, setRefreshReviews] = useState({});
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   useEffect(() => {
@@ -54,9 +55,7 @@ export default function Explore() {
       {error && <div className="text-center text-red-500">{error}</div>}
       {buyMsg && <div className="text-center text-accent font-bold mb-4">{buyMsg}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {musics.map(music => {
-          const [refreshReviews, setRefreshReviews] = useState(0);
-          return (
+        {musics.map(music => (
             <div key={music._id} className="bg-[#232323] rounded-lg shadow p-4 flex flex-col md:flex-row items-center">
               <img src={music.coverUrl} alt={music.title} className="w-32 h-32 object-cover rounded mb-4 md:mb-0 md:mr-6" />
               <div className="flex-1">
@@ -71,14 +70,13 @@ export default function Explore() {
                 {isAuthenticated && user?.id !== music.artist?._id && !user?.library?.includes(music._id) && (
                   <BuyMusicButton music={music} />
                 )}
-                <MusicReviews musicId={music._id} refresh={refreshReviews} />
+                <MusicReviews musicId={music._id} refresh={refreshReviews[music._id] || 0} />
                 {user?.library?.includes(music._id) && (
-                  <MusicReviewForm musicId={music._id} onReviewAdded={() => setRefreshReviews(r => r + 1)} />
+                  <MusicReviewForm musicId={music._id} onReviewAdded={() => setRefreshReviews(r => ({ ...r, [music._id]: (r[music._id] || 0) + 1 }))} />
                 )}
               </div>
             </div>
-          );
-        })}
+        ))}
       </div>
       {musics.length === 0 && !loading && !error && (
         <div className="text-center text-gray-400 mt-8">Aucune musique trouvée.</div>
