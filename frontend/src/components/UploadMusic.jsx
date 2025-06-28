@@ -34,7 +34,7 @@ export default function UploadMusic() {
         method: 'POST',
         body: formData,
         headers: {
-          // 'Authorization': 'Bearer ' + localStorage.getItem('token'), // à activer si besoin
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
         },
       });
       const data = await res.json();
