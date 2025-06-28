@@ -156,4 +156,65 @@ router.get('/:id/reviews', async (req, res) => {
   }
 });
 
+// Dashboard artiste : toutes les musiques de l'artiste connecté
+router.get('/artist-dashboard', auth, async (req, res) => {
+  try {
+    // Récupérer toutes les musiques de l'artiste
+    const musics = await Music.find({ artist: req.user.id });
+    const musicIds = musics.map(m => m._id);
+
+    // Calculer le nombre total de ventes (nombre d'achats de ses musiques)
+    const Order = require('../models/Order');
+    const orders = await Order.find({ 'items.musicId': { $in: musicIds } });
+    let totalSales = 0;
+    let totalRevenue = 0;
+    // Calcul des ventes par musique
+    const salesByMusic = {};
+    musics.forEach(m => { salesByMusic[m._id] = 0; });
+    orders.forEach(order => {
+      order.items.forEach(item => {
+        if (musicIds.some(id => id.equals(item.musicId))) {
+          totalSales += item.quantity || 1;
+          // Trouver le prix de la musique
+          const music = musics.find(m => m._id.equals(item.musicId));
+          if (music) {
+            totalRevenue += (music.price || 0) * (item.quantity || 1);
+          }
+          salesByMusic[item.musicId] = (salesByMusic[item.musicId] || 0) + (item.quantity || 1);
+        }
+      });
+    });
+    // Ajouter le champ sales à chaque musique
+    const musicsWithSales = musics.map(m => {
+      const mObj = m.toObject();
+      mObj.sales = salesByMusic[m._id] || 0;
+      return mObj;
+    });
+    // Top musique (plus vendue)
+    let topMusic = null;
+    if (musicsWithSales.length > 0) {
+      topMusic = musicsWithSales.reduce((max, m) => (m.sales > (max?.sales || 0) ? m : max), musicsWithSales[0]);
+    }
+    // Streams non gérés (0 par défaut)
+    res.json({
+      totalTracks: musics.length,
+      totalSales,
+      totalRevenue,
+      totalStreams: 0,
+      musics: musicsWithSales,
+      topMusic
+    });
+  } catch (err) {
+    res.status(500).json({
+      totalTracks: 0,
+      totalSales: 0,
+      totalRevenue: 0,
+      totalStreams: 0,
+      musics: [],
+      topMusic: null,
+      error: 'Erreur serveur.'
+    });
+  }
+});
+
 module.exports = router;
