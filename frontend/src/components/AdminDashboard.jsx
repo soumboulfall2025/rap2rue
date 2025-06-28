@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                 <td className="px-4 py-2">
                   <button onClick={() => handleDeleteUser(u._id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm mr-2">Supprimer</button>
                   {u.role !== 'admin' && (
-                    <button onClick={() => handlePromoteUser(u._id)} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Promouvoir admin</button>
+                    <button onClick={() => handlePromoteUser(u._id)} className="bg-green-600 hover:bg-[#1db954] text-white px-3 py-1 rounded text-sm">Promouvoir admin</button>
                   )}
                 </td>
               </tr>
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                 <td className="px-4 py-2 text-gray-200">{m.title}</td>
                 <td className="px-4 py-2 text-gray-300">{m.artist?.name || m.artist?.toString() || "-"}</td>
                 <td className="px-4 py-2">
-                  <button onClick={() => handleDeleteMusic(m._id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Supprimer</button>
+                  <button onClick={() => handleDeleteMusic(m._id)} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm mr-2">Supprimer</button>
                 </td>
               </tr>
             ))}
