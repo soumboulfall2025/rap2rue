@@ -65,6 +65,9 @@ export default function Explore() {
                 <div className="mb-1">Prix : <span className="font-semibold">{music.price} €</span></div>
                 <div className="mb-2 text-sm text-gray-300">{music.description}</div>
                 {/* Audio preview 30s pour les non-acheteurs, complet sinon */}
+                {user && user.role === 'fan' && !user.library?.includes(music._id) && user.id !== music.artist?._id && (
+                  <BuyMusicButton music={music} />
+                )}
                 {user?.library?.includes(music._id) || user?.id === music.artist?._id ? (
                   <audio controls src={music.audioUrl} className="w-full mt-2" preload="none" controlsList="nodownload">
                     Votre navigateur ne supporte pas l'audio.
