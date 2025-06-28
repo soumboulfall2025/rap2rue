@@ -13,7 +13,7 @@ function BuyMusicButton({ music }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
         },
         body: JSON.stringify({
           items: [

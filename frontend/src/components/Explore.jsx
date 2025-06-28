@@ -64,11 +64,24 @@ export default function Explore() {
                 <div className="mb-1">Artiste : <span className="font-semibold">{music.artist?.name || 'Inconnu'}</span></div>
                 <div className="mb-1">Prix : <span className="font-semibold">{music.price} €</span></div>
                 <div className="mb-2 text-sm text-gray-300">{music.description}</div>
-                <audio controls src={music.audioUrl} className="w-full mt-2" preload="none">
-                  Votre navigateur ne supporte pas l'audio.
-                </audio>
-                {isAuthenticated && user?.id !== music.artist?._id && !user?.library?.includes(music._id) && (
-                  <BuyMusicButton music={music} />
+                {/* Audio preview 30s pour les non-acheteurs, complet sinon */}
+                {user?.library?.includes(music._id) || user?.id === music.artist?._id ? (
+                  <audio controls src={music.audioUrl} className="w-full mt-2" preload="none" controlsList="nodownload">
+                    Votre navigateur ne supporte pas l'audio.
+                  </audio>
+                ) : (
+                  <audio
+                    controls
+                    src={music.audioUrl}
+                    className="w-full mt-2"
+                    preload="none"
+                    controlsList="nodownload"
+                    onTimeUpdate={e => {
+                      if (e.target.currentTime > 30) e.target.currentTime = 0;
+                    }}
+                  >
+                    Votre navigateur ne supporte pas l'audio.
+                  </audio>
                 )}
                 <MusicReviews musicId={music._id} refresh={refreshReviews[music._id] || 0} />
                 {user?.library?.includes(music._id) && (
