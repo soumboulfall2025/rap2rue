@@ -9,7 +9,10 @@ const authRoutes = require('./routes/auth');
 const musicRoutes = require('./routes/music');
 const paymentRoutes = require('./routes/payment');
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://rap2rue-frontend.onrender.com', // ou '*' pour tout autoriser (moins sécurisé)
+  credentials: true
+}));
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -19,6 +22,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/music', musicRoutes);
 app.use('/api/payment', paymentRoutes);
+// --- ROUTES ADMIN ---
+app.use('/api/admin', require('./routes/admin'));
 
 // ... routes à venir (artistes, musiques, achats, etc.)
 

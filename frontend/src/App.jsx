@@ -12,6 +12,7 @@ import Library from './components/Library';
 import PrivateRoute from './components/PrivateRoute';
 import ArtistRoute from './components/ArtistRoute';
 import ArtistDashboard from './components/ArtistDashboard';
+import AdminDashboard from './components/AdminDashboard';
 import logo from './assets/react.jpeg';
 import background from './assets/background.jpeg';
 
@@ -153,6 +154,9 @@ function App() {
                   <ArtistDashboard />
                 </ArtistRoute>
               } />
+            )}
+            {user && user.role === 'admin' && (
+              <Route path="/admin" element={<AdminDashboard />} />
             )}
           </Routes>
         </div>
