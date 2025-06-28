@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Paydunya = require('paydunya');
 const Review = require('../models/Review');
+const fs = require('fs');
 
 // Config Cloudinary
 cloudinary.config({
@@ -34,7 +35,10 @@ const audioStorage = new CloudinaryStorage({
   },
 });
 
-const upload = multer();
+// Utilisation du storage Cloudinary pour chaque champ
+const upload = multer({
+  storage: multer.diskStorage({}) // fallback, mais on va gérer manuellement dans la route
+});
 const router = express.Router();
 
 // Middleware d'authentification simple (JWT)
@@ -60,34 +64,42 @@ router.post('/upload', auth, upload.fields([
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
     // Upload cover
-    const coverResult = await cloudinary.uploader.upload_stream({
-      folder: 'rap2rue/covers', resource_type: 'image'
-    }, async (error, result) => {
-      if (error) return res.status(500).json({ message: 'Erreur upload cover.' });
-      // Upload audio
-      const audioResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({
-          folder: 'rap2rue/audios', resource_type: 'video'
-        }, (err, audioRes) => {
+    const coverResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        req.files.cover[0].path,
+        { folder: 'rap2rue/covers', resource_type: 'image' },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+    });
+    // Upload audio
+    const audioResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        req.files.audio[0].path,
+        { folder: 'rap2rue/audios', resource_type: 'video' },
+        (err, audioRes) => {
           if (err) reject(err);
           else resolve(audioRes);
-        }).end(req.files.audio[0].buffer);
-      });
-      // Création musique
-      const music = new Music({
-        title,
-        genre,
-        price,
-        description,
-        coverUrl: result.secure_url,
-        audioUrl: audioResult.secure_url,
-        artist: req.user.id,
-      });
-      await music.save();
-      res.status(201).json({ message: 'Musique uploadée !', music });
+        }
+      );
     });
-    // Démarre l'upload cover
-    coverResult.end(req.files.cover[0].buffer);
+    // Suppression des fichiers temporaires
+    fs.unlink(req.files.cover[0].path, () => {});
+    fs.unlink(req.files.audio[0].path, () => {});
+    // Création musique
+    const music = new Music({
+      title,
+      genre,
+      price,
+      description,
+      coverUrl: coverResult.secure_url,
+      audioUrl: audioResult.secure_url,
+      artist: req.user.id,
+    });
+    await music.save();
+    res.status(201).json({ message: 'Musique uploadée !', music });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -168,9 +180,10 @@ router.get('/artist-dashboard', auth, async (req, res) => {
     const orders = await Order.find({ 'items.musicId': { $in: musicIds } });
     let totalSales = 0;
     let totalRevenue = 0;
-    // Calcul des ventes par musique
+    // Calcul des ventes et revenus par musique
     const salesByMusic = {};
-    musics.forEach(m => { salesByMusic[m._id] = 0; });
+    const revenueByMusic = {};
+    musics.forEach(m => { salesByMusic[m._id] = 0; revenueByMusic[m._id] = 0; });
     orders.forEach(order => {
       order.items.forEach(item => {
         if (musicIds.some(id => id.equals(item.musicId))) {
@@ -178,22 +191,25 @@ router.get('/artist-dashboard', auth, async (req, res) => {
           // Trouver le prix de la musique
           const music = musics.find(m => m._id.equals(item.musicId));
           if (music) {
-            totalRevenue += (music.price || 0) * (item.quantity || 1);
+            const revenue = (music.price || 0) * (item.quantity || 1);
+            totalRevenue += revenue;
+            revenueByMusic[item.musicId] = (revenueByMusic[item.musicId] || 0) + revenue;
           }
           salesByMusic[item.musicId] = (salesByMusic[item.musicId] || 0) + (item.quantity || 1);
         }
       });
     });
-    // Ajouter le champ sales à chaque musique
-    const musicsWithSales = musics.map(m => {
+    // Ajouter les champs sales et revenue à chaque musique
+    const musicsWithStats = musics.map(m => {
       const mObj = m.toObject();
       mObj.sales = salesByMusic[m._id] || 0;
+      mObj.revenue = revenueByMusic[m._id] || 0;
       return mObj;
     });
     // Top musique (plus vendue)
     let topMusic = null;
-    if (musicsWithSales.length > 0) {
-      topMusic = musicsWithSales.reduce((max, m) => (m.sales > (max?.sales || 0) ? m : max), musicsWithSales[0]);
+    if (musicsWithStats.length > 0) {
+      topMusic = musicsWithStats.reduce((max, m) => (m.sales > (max?.sales || 0) ? m : max), musicsWithStats[0]);
     }
     // Streams non gérés (0 par défaut)
     res.json({
@@ -201,7 +217,7 @@ router.get('/artist-dashboard', auth, async (req, res) => {
       totalSales,
       totalRevenue,
       totalStreams: 0,
-      musics: musicsWithSales,
+      musics: musicsWithStats,
       topMusic
     });
   } catch (err) {

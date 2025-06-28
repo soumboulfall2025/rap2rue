@@ -83,6 +83,7 @@ export default function ArtistDashboard() {
                   <th className="px-4 py-2 text-left text-gray-400">Prix</th>
                   <th className="px-4 py-2 text-left text-gray-400">Date</th>
                   <th className="px-4 py-2 text-left text-gray-400">Ventes</th>
+                  <th className="px-4 py-2 text-left text-gray-400">Revenu</th>
                 </tr>
               </thead>
               <tbody>
@@ -93,6 +94,7 @@ export default function ArtistDashboard() {
                     <td className="px-4 py-2 text-gray-300">{music.price} FCFA</td>
                     <td className="px-4 py-2 text-gray-400">{new Date(music.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-2 text-accent font-bold">{music.sales || 0}</td>
+                    <td className="px-4 py-2 text-green-400 font-bold">{music.revenue || 0} FCFA</td>
                   </tr>
                 ))}
               </tbody>
