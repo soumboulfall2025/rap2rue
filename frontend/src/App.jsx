@@ -150,7 +150,7 @@ function App() {
             <div className="flex justify-center"><UserStatus /></div>
           </div>
           {/* Overlay mobile */}
-          {navOpen && <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={() => setNavOpen(false)}></div>}
+          {navOpen && <div className="fixed inset-0 bg-green/60 z-30 md:hidden" onClick={() => setNavOpen(false)}></div>}
         </nav>
         {/* Notification popup pour nouveaux visiteurs */}
         {showWelcome && (
