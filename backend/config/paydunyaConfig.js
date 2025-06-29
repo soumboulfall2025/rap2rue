@@ -15,8 +15,8 @@ const store = new paydunya.Store({
   tagline: 'La plateforme rap la plus street',
   phone_number: '787203975',
   postal_address: 'Dakar, Sénégal',
-  websiteUrl: 'https://rap2rue.com',
-  logoUrl: 'https://rap2rue.com/logo.png', // à adapter
+  websiteUrl: 'https://rap2rue-frontend.onrender.com',
+  logoUrl: 'https://rap2rue-frontend.onrender.com/logo.png', // à adapter
 });
 
 module.exports = { setup, store };

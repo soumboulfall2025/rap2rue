@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { apiUrl } from '../utils/api';
+import { useOutletContext } from 'react-router-dom';
 
 export default function UploadMusic() {
   const [title, setTitle] = useState('');
@@ -11,6 +12,7 @@ export default function UploadMusic() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [globalLoading] = useOutletContext?.() || [null];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +23,7 @@ export default function UploadMusic() {
       return;
     }
     setLoading(true);
+    if (globalLoading) globalLoading(true);
     // Préparation du formData pour upload
     const formData = new FormData();
     formData.append('title', title);
@@ -45,6 +48,7 @@ export default function UploadMusic() {
       setError(err.message);
     } finally {
       setLoading(false);
+      if (globalLoading) globalLoading(false);
     }
   };
 

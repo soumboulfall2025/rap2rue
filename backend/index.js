@@ -34,3 +34,21 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     app.listen(PORT, () => console.log(`Serveur backend lancé sur le port ${PORT}`));
   })
   .catch(err => console.error('Erreur MongoDB :', err));
+
+// --- UX MOBILE : loader plein écran lors des actions importantes ---
+// Ajout d'un composant Loader global (à placer dans App.jsx ou un composant Layout)
+// Exemple d'intégration :
+// {loading && <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200]">
+//   <div className="loader"></div>
+// </div>}
+//
+// Ajoute ce CSS dans App.css :
+// .loader {
+//   border: 8px solid #232323;
+//   border-top: 8px solid #1db954;
+//   border-radius: 50%;
+//   width: 60px;
+//   height: 60px;
+//   animation: spin 1s linear infinite;
+// }
+// @keyframes spin { 100% { transform: rotate(360deg); } }

@@ -21,6 +21,12 @@ function App() {
   const user = useSelector(state => state.user.user);
   const [navOpen, setNavOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  // Loader global (affiché lors des actions longues)
+  const [globalLoading, setGlobalLoading] = useState(false);
+  const [theme, setTheme] = useState('dark');
+  useEffect(() => {
+    document.body.classList.toggle('light', theme === 'light');
+  }, [theme]);
 
   useEffect(() => {
     if (!localStorage.getItem('hasVisited')) {
@@ -47,45 +53,71 @@ function App() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          backgroundColor: '#101010',
+          backgroundColor: 'var(--bg-main)',
+          color: 'var(--text-main)',
         }}
       >
+        {/* Switch mode sombre/clair */}
+        <button
+          className="fixed bottom-6 right-6 z-[300] bg-[#232323] text-accent p-3 rounded-full shadow-lg border-2 border-accent hover:bg-accent hover:text-[#18181b] transition"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          aria-label="Changer le mode sombre/clair"
+        >
+          {theme === 'dark' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.05l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" /></svg>
+          )}
+        </button>
+        {/* Loader plein écran */}
+        {globalLoading && (
+          <div className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-[200]">
+            <div className="loader"></div>
+            <div className="loader-message">Chargement…</div>
+          </div>
+        )}
         {/* Barre de navigation sticky, bord à bord */}
         <nav className="flex items-center justify-between w-full px-8 py-5 border-b border-white/10 bg-[#18181b]/80 backdrop-blur sticky top-0 z-50 shadow-lg">
           <div className="flex items-center">
             <span className="text-3xl font-extrabold tracking-widest text-accent drop-shadow">RAP2RUE</span>
           </div>
-          {/* Burger menu mobile */}
-          <button className="md:hidden flex items-center px-2 py-1" onClick={() => setNavOpen(!navOpen)} aria-label="Ouvrir le menu">
-            <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+          {/* Burger menu mobile avec croix de fermeture */}
+          <button className="md:hidden flex items-center px-2 py-1 z-50" onClick={() => setNavOpen(!navOpen)} aria-label="Ouvrir le menu">
+            {navOpen ? (
+              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
-          {/* Liens de navigation mobile (sidebar vert) */}
+          {/* Liens de navigation mobile (sidebar vert, fond plus opaque, boutons plus gros) */}
           <div
             className={`
               fixed md:hidden top-0 right-0 h-full w-2/3 max-w-xs
-              bg-[#101010] shadow-2xl flex flex-col items-center space-y-8 pt-24 transition-transform duration-300 z-40
+              bg-[#101010]/95 shadow-2xl flex flex-col items-center space-y-8 pt-24 transition-transform duration-300 z-40
               ${navOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : ''}
               ${!navOpen ? 'translate-x-full opacity-0 pointer-events-none' : ''}
             `.replace(/\s+/g, ' ')}
           >
-            <Link to="/" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Accueil</Link>
-            <Link to="/explore" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Explorer</Link>
+            <Link to="/" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Accueil</Link>
+            <Link to="/explore" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Explorer</Link>
             {!user && (
               <>
-                <Link to="/login" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Connexion</Link>
-                <Link to="/register" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Inscription</Link>
+                <Link to="/login" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Connexion</Link>
+                <Link to="/register" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Inscription</Link>
               </>
             )}
             {user && (
               <>
-                <Link to="/profile" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Profil</Link>
-                <Link to="/library" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Ma bibliothèque</Link>
+                <Link to="/profile" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Profil</Link>
+                <Link to="/library" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Ma bibliothèque</Link>
                 {user.role === 'artist' && (
                   <>
-                    <Link to="/upload" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Uploader</Link>
-                    <Link to="/dashboard" className="nav-link w-full text-center" onClick={() => setNavOpen(false)}>Dashboard</Link>
+                    <Link to="/upload" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Uploader</Link>
+                    <Link to="/dashboard" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Dashboard</Link>
                   </>
                 )}
               </>

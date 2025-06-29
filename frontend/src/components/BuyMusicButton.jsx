@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { apiUrl } from "../utils/api";
+import { useOutletContext } from 'react-router-dom';
 
 function BuyMusicButton({ music }) {
   const user = useSelector((state) => state.user.user);
   const [loading, setLoading] = useState(false);
+  const [_, setGlobalLoading] = useOutletContext?.() || [null, null];
 
   const handleBuy = async () => {
     setLoading(true);
+    if (setGlobalLoading) setGlobalLoading(true);
     try {
       const res = await fetch(apiUrl("/api/payment/paydunya"), {
         method: "POST",
@@ -39,6 +42,7 @@ function BuyMusicButton({ music }) {
       alert("Erreur serveur.");
     }
     setLoading(false);
+    if (setGlobalLoading) setGlobalLoading(false);
   };
 
   return (
