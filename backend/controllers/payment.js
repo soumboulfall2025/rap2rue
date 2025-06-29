@@ -34,7 +34,12 @@ const placeOrderPaydunya = async (req, res) => {
                         paymentMethod: "paydunya",
                         payment: false,
                         date: Date.now(),
+
+                        // Nouveau : infos PayDunya
+                        paydunyaInvoiceId: invoice.token,
+                        paydunyaResponse: invoice
                     };
+
                     // Vérification de la présence de musicId pour chaque item
                     for (const item of items) {
                         if (!item.musicId) {
