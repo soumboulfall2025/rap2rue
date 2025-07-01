@@ -23,6 +23,7 @@ import ChangePasswordModal from './components/ChangePasswordModal';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import SocialCallback from './components/SocialCallback';
+import VideoFeed from './components/VideoFeed';
 
 function App() {
   const user = useSelector(state => state.user.user);
@@ -163,6 +164,7 @@ function App() {
                 )}
               </>
             )}
+            <Link to="/videos" className="nav-link text-center">TikTok</Link>
             <div className="flex justify-center"><UserStatus /></div>
           </div>
         </nav>
@@ -216,6 +218,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/social-callback" element={<SocialCallback />} />
+            <Route path="/videos" element={<VideoFeed />} />
           </Routes>
         </div>
         {/* Bottom bar mobile only, dynamique selon l'état utilisateur */}
