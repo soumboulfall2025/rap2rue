@@ -42,14 +42,14 @@ export default function UploadVideo({ onUpload }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded shadow max-w-md mx-auto">
-      <h2 className="text-xl font-bold">Uploader une vidéo</h2>
-      <input type="text" placeholder="Titre" value={title} onChange={e => setTitle(e.target.value)} className="w-full border p-2" required />
-      <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="w-full border p-2" />
-      <input type="file" accept="video/*" onChange={e => setFile(e.target.files[0])} className="w-full" required />
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-[#18181b] rounded-xl shadow max-w-md mx-auto border border-[#232323] animate-fade-in">
+      <h2 className="text-xl font-bold text-accent mb-2">Uploader une vidéo</h2>
+      <input type="text" placeholder="Titre" value={title} onChange={e => setTitle(e.target.value)} className="w-full border border-gray-700 bg-[#232323] text-white p-2 rounded" required />
+      <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="w-full border border-gray-700 bg-[#232323] text-white p-2 rounded" />
+      <input type="file" accept="video/*" onChange={e => setFile(e.target.files[0])} className="w-full text-white" required />
       {error && <div className="text-red-500">{error}</div>}
-      {success && <div className="text-green-600">Vidéo uploadée avec succès !</div>}
-      <button type="submit" className="bg-black text-white px-4 py-2 rounded" disabled={loading}>{loading ? 'Upload...' : 'Uploader'}</button>
+      {success && <div className="text-green-400">Vidéo uploadée avec succès !</div>}
+      <button type="submit" className="bg-accent text-black px-4 py-2 rounded w-full font-bold hover:bg-[#17a74a] transition" disabled={loading}>{loading ? 'Upload...' : 'Uploader'}</button>
     </form>
   );
 }
