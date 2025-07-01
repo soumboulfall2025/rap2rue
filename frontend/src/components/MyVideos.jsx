@@ -17,7 +17,7 @@ export default function MyVideos() {
         Authorization: 'Bearer ' + localStorage.getItem('token')
       }
     })
-      .then(res => setVideos(res.data))
+      .then(res => setVideos(Array.isArray(res.data) ? res.data : []))
       .catch(() => setError('Erreur lors du chargement des vidéos'))
       .finally(() => setLoading(false));
   }, []);
@@ -58,13 +58,13 @@ export default function MyVideos() {
 
   if (loading) return <div>Chargement...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
-  if (!videos.length) return <div>Aucune vidéo publiée.</div>;
+  if (!Array.isArray(videos) || !videos.length) return <div>Aucune vidéo publiée.</div>;
 
   return (
     <div className="mt-8">
       <h3 className="text-xl font-bold mb-4 text-accent">Vos vidéos TikTok</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {videos.map(video => (
+        {(Array.isArray(videos) ? videos : []).map(video => (
           <div key={video._id} className="bg-[#232323] rounded-xl p-4 shadow-lg">
             <video src={video.url} controls className="w-full rounded mb-2" />
             <div className="font-semibold text-white">{video.title}</div>

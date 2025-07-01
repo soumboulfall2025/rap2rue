@@ -164,7 +164,7 @@ function App() {
                 )}
               </>
             )}
-            <Link to="/videos" className="nav-link text-center">TikTok</Link>
+            <Link to="/reels" className="nav-link text-center">Reels</Link>
             <div className="flex justify-center"><UserStatus /></div>
           </div>
         </nav>
@@ -218,7 +218,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/social-callback" element={<SocialCallback />} />
-            <Route path="/videos" element={<VideoFeed />} />
+            <Route path="/reels" element={<VideoFeed />} />
           </Routes>
         </div>
         {/* Bottom bar mobile only, dynamique selon l'état utilisateur */}

@@ -14,9 +14,10 @@ export default function VideoFeed() {
   useEffect(() => {
     axios.get(API_URL + `?page=${page}&limit=10`)
       .then(res => {
-        if (page === 1) setVideos(res.data);
-        else setVideos(v => [...v, ...res.data]);
-        if (res.data.length < 10) setHasMore(false);
+        const data = Array.isArray(res.data) ? res.data : [];
+        if (page === 1) setVideos(data);
+        else setVideos(v => [...v, ...data]);
+        if (data.length < 10) setHasMore(false);
       })
       .catch(() => setVideos([]));
   }, [page]);
@@ -55,9 +56,9 @@ export default function VideoFeed() {
     };
   }, [current, videos.length, hasMore]);
 
-  if (!videos.length) return <div className="flex justify-center items-center h-screen">Aucune vidéo</div>;
+  if (!Array.isArray(videos) || !videos.length) return <div className="flex justify-center items-center h-screen">Aucune vidéo</div>;
 
-  const video = videos[current];
+  const video = videos[current] || {};
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-black text-white relative">

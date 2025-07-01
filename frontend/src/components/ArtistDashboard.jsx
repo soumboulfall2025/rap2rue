@@ -73,7 +73,7 @@ export default function ArtistDashboard() {
         </div>
       )}
       {/* Liste détaillée des musiques publiées */}
-      {stats && stats.musics && stats.musics.length > 0 && (
+      {stats && Array.isArray(stats.musics) && stats.musics.length > 0 && (
         <div className="mt-12">
           <h3 className="text-2xl font-bold mb-4 text-accent">Vos musiques publiées</h3>
           <div className="overflow-x-auto">

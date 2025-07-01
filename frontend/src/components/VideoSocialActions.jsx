@@ -10,13 +10,14 @@ export default function VideoSocialActions({ videoId }) {
 
   useEffect(() => {
     axios.get(`/api/video/${videoId}/stats`).then(res => setStats(res.data));
-    axios.get(`/api/video/${videoId}/comments`).then(res => setComments(res.data));
+    axios.get(`/api/video/${videoId}/comments`).then(res => setComments(Array.isArray(res.data) ? res.data : []));
     // Vérifie si l'utilisateur a liké (simple, à améliorer avec le backend si besoin)
     const token = localStorage.getItem('token');
     if (token) {
       axios.get(`/api/video/my`, { headers: { Authorization: 'Bearer ' + token } })
         .then(res => {
-          const v = res.data.find(v => v._id === videoId);
+          const list = Array.isArray(res.data) ? res.data : [];
+          const v = list.find(v => v._id === videoId);
           if (v && v.likes && v.likes.includes(JSON.parse(atob(token.split('.')[1])).id)) setLiked(true);
         });
     }
@@ -61,7 +62,7 @@ export default function VideoSocialActions({ videoId }) {
         <button type="submit" className="bg-accent text-white px-3 py-1 rounded" disabled={loading}>Envoyer</button>
       </form>
       <div className="mt-2 max-h-32 overflow-y-auto">
-        {comments.map((c, i) => (
+        {(Array.isArray(comments) ? comments : []).map((c, i) => (
           <div key={i} className="text-sm text-gray-200 border-b border-gray-700 py-1">
             <span className="font-bold">{c.user?.name || 'Utilisateur'}</span> : {c.text}
           </div>
