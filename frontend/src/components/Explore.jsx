@@ -12,6 +12,7 @@ export default function Explore() {
   const [error, setError] = useState('');
   const [buyMsg, setBuyMsg] = useState('');
   const [refreshReviews, setRefreshReviews] = useState({});
+  const [currentMusicId, setCurrentMusicId] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.user);
 
   useEffect(() => {
@@ -71,39 +72,10 @@ export default function Explore() {
               _id: music._id,
               userRole: user?.role || 'fan',
             }}
-            onPlay={() => {
-              if (!window._audio) window._audio = new Audio();
-              window._audio.src = music.audioUrl;
-              window._audio.play();
-              window._currentMusicId = music._id;
-              window.dispatchEvent(new CustomEvent('music:change', { detail: { id: music._id } }));
-            }}
-            onPause={() => {
-              if (window._audio) window._audio.pause();
-            }}
-            onPrev={() => {
-              if (idx > 0) {
-                const prev = musics[idx - 1];
-                if (!window._audio) window._audio = new Audio();
-                window._audio.src = prev.audioUrl;
-                window._audio.play();
-                window._currentMusicId = prev._id;
-                window.dispatchEvent(new CustomEvent('music:change', { detail: { id: prev._id } }));
-              }
-            }}
-            onNext={() => {
-              if (idx < musics.length - 1) {
-                const next = musics[idx + 1];
-                if (!window._audio) window._audio = new Audio();
-                window._audio.src = next.audioUrl;
-                window._audio.play();
-                window._currentMusicId = next._id;
-                window.dispatchEvent(new CustomEvent('music:change', { detail: { id: next._id } }));
-              }
-            }}
-            onLike={() => {/* TODO: gestion favoris */}}
+            onPlay={() => setCurrentMusicId(music._id)}
+            onPause={() => setCurrentMusicId(null)}
             liked={user?.library?.includes(music._id)}
-            isActive={window._currentMusicId === music._id}
+            isActive={currentMusicId === music._id}
             price={music.price}
             description={music.description}
           />

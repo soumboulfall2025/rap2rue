@@ -9,31 +9,51 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const previewLimit = 30; // 30 secondes max si non acheté
+  const audioRef = useRef(null);
+
+  const isAdmin = music.userRole === 'admin';
+  console.log('userRole:', music.userRole, 'title:', music.title);
 
   useEffect(() => {
+    if (!isActive) return;
+    // Nettoyer l'ancien audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    // Créer un nouvel audio local
+    const audio = new Audio(music.audioUrl);
+    audioRef.current = audio;
+    audio.currentTime = 0;
+    setCurrentTime(0);
+    setDuration(0);
+
     function handleTimeUpdate() {
-      if (window._audio && window._audio.src === music.audioUrl && isActive) {
-        setCurrentTime(window._audio.currentTime);
-        setDuration(window._audio.duration || 0);
-        // Limite stricte : tout le monde sauf admin est bloqué à 30s
-        if (!isAdmin && window._audio.currentTime >= previewLimit) {
-          window._audio.pause();
-          window._audio.currentTime = 0;
-          setCurrentTime(0);
-        }
+      setCurrentTime(audio.currentTime);
+      setDuration(audio.duration || 0);
+      if (!isAdmin && audio.currentTime >= previewLimit) {
+        audio.pause();
+        audio.currentTime = previewLimit;
+        setCurrentTime(previewLimit);
       }
     }
-    if (isActive && window._audio) {
-      window._audio.addEventListener('timeupdate', handleTimeUpdate);
-      setCurrentTime(window._audio.currentTime);
-      setDuration(window._audio.duration || 0);
-    }
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    // Lancer la lecture automatiquement à l'activation
+    audio.play();
     return () => {
-      if (window._audio) {
-        window._audio.removeEventListener('timeupdate', handleTimeUpdate);
-      }
+      audio.pause();
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, [isActive, music.audioUrl, isAdmin]);
+
+  const handleSlider = (e) => {
+    let val = Number(e.target.value);
+    if (!isAdmin && val > previewLimit) val = previewLimit;
+    if (audioRef.current) {
+      audioRef.current.currentTime = val;
+      setCurrentTime(val);
+    }
+  };
 
   const formatTime = s => {
     if (!s || isNaN(s)) return '0:00';
@@ -41,10 +61,6 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
     const sec = Math.floor(s % 60).toString().padStart(2, '0');
     return `${m}:${sec}`;
   };
-
-  // Seul l'admin peut écouter l'intégralité, tous les autres (fans/artistes) sont limités à 30s
-  const isAdmin = music.userRole === 'admin';
-  console.log('userRole:', music.userRole, 'title:', music.title);
 
   return (
     <div className={`bg-[#181818] rounded-xl shadow-lg p-4 flex flex-col items-center w-full max-w-xs mx-auto hover:scale-105 transition-transform duration-200 ${isActive ? 'ring-4 ring-[#1ed760]' : ''}`}>
@@ -70,6 +86,7 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
           className="bg-green-500 hover:bg-green-600 text-white rounded-full p-2 shadow-md focus:outline-none"
           onClick={onPlay}
           title={music.isBought ? 'Écouter' : 'Écouter un extrait (30s)'}
+          disabled={!isAdmin && currentTime >= previewLimit}
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-7 h-7">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 5v14l11-7z" fill="white" />
@@ -101,20 +118,9 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
           min={0}
           max={isAdmin ? (duration || 1) : previewLimit}
           value={isAdmin ? currentTime : Math.min(currentTime, previewLimit)}
-          onChange={e => {
-            let val = Number(e.target.value);
-            if (!isAdmin && val > previewLimit) val = previewLimit;
-            if (window._audio && window._audio.src === music.audioUrl && isActive) {
-              window._audio.currentTime = val;
-              setCurrentTime(val);
-              if (!isAdmin && val >= previewLimit) {
-                window._audio.pause();
-                window._audio.currentTime = 0;
-                setCurrentTime(0);
-              }
-            }
-          }}
+          onChange={handleSlider}
           className="w-full accent-green-500"
+          disabled={!isAdmin && currentTime >= previewLimit}
         />
         <div className="flex justify-between w-full text-xs text-gray-400 mt-1">
           <span>{formatTime(currentTime)}</span>
