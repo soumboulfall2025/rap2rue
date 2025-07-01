@@ -11,13 +11,16 @@ const AdminVideoValidation = ({ cardStyle }) => {
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(apiUrl('/video/all?validated=false'), {
+      const res = await fetch(apiUrl('/api/video/all?validated=false'), {
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || 'Erreur inconnue');
+      }
       setVideos(await res.json());
     } catch (err) {
-      setFeedback("Erreur lors du chargement des vidéos.");
+      setFeedback(err.message || "Erreur lors du chargement des vidéos.");
     }
     setLoading(false);
   };
@@ -29,7 +32,7 @@ const AdminVideoValidation = ({ cardStyle }) => {
   // Valide une vidéo
   const validateVideo = async (id) => {
     try {
-      const res = await fetch(apiUrl(`/video/${id}/validate`), {
+      const res = await fetch(apiUrl(`/api/video/${id}/validate`), {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
       });
