@@ -225,6 +225,7 @@ function App() {
         <nav className="fixed bottom-0 left-0 w-full bg-[#18181b] border-t border-white/10 flex justify-between items-center px-2 py-2 z-50 shadow-2xl md:hidden">
           <MobileNavLink to="/" label="Accueil" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M3 12l2-2m0 0l7-7 7 7m-9 2v8m0 0h4m-4 0a2 2 0 01-2-2v-4a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2z' /></svg>} />
           <MobileNavLink to="/explore" label="Explorer" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M12 8v4l3 3' /></svg>} />
+          <MobileNavLink to="/reels" label="Reels" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><rect x='4' y='4' width='16' height='16' rx='4' /><path d='M8 12h8M12 8v8' /></svg>} />
           {!user && (
             <>
               <MobileNavLink to="/login" label="Connexion" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M15 12H3m6-6l-6 6 6 6' /></svg>} />
