@@ -19,7 +19,7 @@ export default function UploadVideo({ onUpload }) {
       // 1. Upload sur Cloudinary (ou autre)
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'ml_default'); // adapte selon ta config Cloudinary
+      formData.append('upload_preset', 'Rap2rue'); // preset Cloudinary correct
       const res = await axios.post('https://api.cloudinary.com/v1_1/dtfcsz1km/video/upload', formData);
       const url = res.data.secure_url;
       // 2. Envoi au backend
