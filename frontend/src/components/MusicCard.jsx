@@ -15,15 +15,16 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
       if (window._audio && window._audio.src === music.audioUrl && isActive) {
         setCurrentTime(window._audio.currentTime);
         setDuration(window._audio.duration || 0);
-        if (!music.isBought && window._audio.currentTime >= previewLimit) {
+        // Limite stricte : tout le monde sauf admin est bloqué à 30s
+        if (!isAdmin && window._audio.currentTime >= previewLimit) {
           window._audio.pause();
           window._audio.currentTime = 0;
+          setCurrentTime(0);
         }
       }
     }
     if (isActive && window._audio) {
       window._audio.addEventListener('timeupdate', handleTimeUpdate);
-      // Mise à jour initiale
       setCurrentTime(window._audio.currentTime);
       setDuration(window._audio.duration || 0);
     }
@@ -32,7 +33,7 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
         window._audio.removeEventListener('timeupdate', handleTimeUpdate);
       }
     };
-  }, [isActive, music.audioUrl, music.isBought]);
+  }, [isActive, music.audioUrl, isAdmin]);
 
   const formatTime = s => {
     if (!s || isNaN(s)) return '0:00';
@@ -98,18 +99,17 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
           type="range"
           min={0}
           max={isAdmin ? (duration || 1) : previewLimit}
-          value={currentTime}
+          value={isAdmin ? currentTime : Math.min(currentTime, previewLimit)}
           onChange={e => {
             let val = Number(e.target.value);
-            // Empêche le seek au-delà de 30s si non admin
             if (!isAdmin && val > previewLimit) val = previewLimit;
             if (window._audio && window._audio.src === music.audioUrl && isActive) {
               window._audio.currentTime = val;
               setCurrentTime(val);
-              // Si on tente de seek au-delà de 30s, on stoppe
               if (!isAdmin && val >= previewLimit) {
                 window._audio.pause();
                 window._audio.currentTime = 0;
+                setCurrentTime(0);
               }
             }
           }}
