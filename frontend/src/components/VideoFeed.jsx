@@ -25,6 +25,21 @@ export default function VideoFeed() {
         if (data.length < 10) setHasMore(false);
       })
       .catch(() => setVideos([]));
+
+    // Rafraîchissement automatique si une vidéo vient d'être validée dans un autre onglet
+    const onStorage = (e) => {
+      if (e.key === 'reels_refresh') {
+        setPage(1);
+        axios.get(API_URL + `?page=1&limit=10`).then(res => {
+          const data = Array.isArray(res.data) ? res.data : [];
+          setVideos(data);
+          setCurrent(0);
+          setHasMore(data.length === 10);
+        });
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, [page]);
 
   // Gestion du scroll pour effet TikTok + pagination
@@ -82,7 +97,7 @@ export default function VideoFeed() {
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-black text-white relative">
       {/* Bouton flottant d'upload pour artistes */}
-      {user && user.role === 'artist' && (
+      {user && (user.role === 'artist' || user.role === 'admin') && (
         <button
           className="fixed bottom-24 right-6 z-40 bg-[#1DB954] text-black p-5 rounded-full shadow-2xl border-4 border-white/10 hover:bg-red-600 hover:text-white transition text-3xl flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-[#1DB954]/50"
           onClick={() => setShowUpload(true)}
@@ -90,6 +105,12 @@ export default function VideoFeed() {
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
         </button>
+      )}
+      {/* Message si non artiste/admin */}
+      {user && user.role !== 'artist' && user.role !== 'admin' && (
+        <div className="fixed bottom-24 right-6 z-40 bg-gray-800 text-white px-4 py-2 rounded-xl shadow-lg text-sm opacity-80">
+          Seuls les artistes ou admins peuvent uploader des vidéos.
+        </div>
       )}
       {/* Modale d'upload vidéo */}
       {showUpload && (

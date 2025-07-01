@@ -39,6 +39,10 @@ const AdminVideoValidation = ({ cardStyle }) => {
       if (!res.ok) throw new Error();
       setFeedback('Vidéo validée !');
       setVideos(videos.filter(v => v._id !== id));
+      // Force le rafraîchissement du feed public (Reels) si ouvert dans un autre onglet
+      if (window.localStorage) {
+        window.localStorage.setItem('reels_refresh', Date.now().toString());
+      }
     } catch (err) {
       setFeedback("Erreur lors de la validation.");
     }
