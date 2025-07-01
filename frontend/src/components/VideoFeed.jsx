@@ -65,6 +65,13 @@ export default function VideoFeed() {
   useEffect(() => {
     if (showUpload === false) {
       setPage(1);
+      // Forcer le rechargement du feed après upload
+      axios.get(API_URL + `?page=1&limit=10`).then(res => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        setVideos(data);
+        setCurrent(0);
+        setHasMore(data.length === 10);
+      });
     }
   }, [showUpload]);
 
