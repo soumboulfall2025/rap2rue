@@ -20,6 +20,7 @@ export default function VideoFeed() {
     axios.get(API_URL + `?page=${page}&limit=10`)
       .then(res => {
         const data = Array.isArray(res.data) ? res.data : [];
+        console.log('Vidéos reçues du backend:', data); // DEBUG
         if (page === 1) setVideos(data);
         else setVideos(v => [...v, ...data]);
         if (data.length < 10) setHasMore(false);
@@ -94,6 +95,28 @@ export default function VideoFeed() {
 
   const video = videos[current] || {};
 
+  // DEBUG : affichage de toutes les vidéos reçues
+  if (Array.isArray(videos) && videos.length > 0) {
+    return (
+      <div className="w-full min-h-screen bg-black text-white p-4">
+        <h2 className="text-2xl font-bold mb-4">Toutes les vidéos reçues du backend</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {videos.map((video, idx) => (
+            <div key={video._id} className="bg-[#232323] rounded-2xl shadow-xl p-4 flex flex-col gap-3 border-2 border-[#1DB954]/30">
+              <video src={video.url} controls className="w-full rounded-xl mb-2" />
+              <div className="text-lg font-bold">{video.title}</div>
+              <div className="text-gray-400 text-sm mb-1">{video.description}</div>
+              <div className="text-xs text-gray-500">Artiste : {video.artist?.name || 'Inconnu'}</div>
+              <div className="text-xs text-gray-500">Date : {new Date(video.createdAt).toLocaleString()}</div>
+              <div className="text-xs text-gray-500">ID : {video._id}</div>
+              <div className="text-xs text-gray-500">isValidated : {video.isValidated ? 'true' : 'false'}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-black text-white relative">
       {/* Bouton flottant d'upload pour artistes */}
@@ -115,30 +138,45 @@ export default function VideoFeed() {
       {/* Modale d'upload vidéo */}
       {showUpload && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-          <div className="bg-[#18181b] rounded-xl p-6 shadow-xl w-full max-w-md relative animate-fade-in">
-            <button onClick={() => setShowUpload(false)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+          <div className="bg-[#121212] rounded-2xl shadow-2xl p-6 max-w-lg w-full">
+            <h2 className="text-2xl font-bold mb-4">Uploader une nouvelle vidéo</h2>
             <UploadVideo onUpload={() => setShowUpload(false)} />
+            <button
+              onClick={() => setShowUpload(false)}
+              className="mt-4 w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition"
+            >
+              Annuler
+            </button>
           </div>
         </div>
       )}
-      <ReactPlayer
-        url={video.url}
-        playing
-        controls={false}
-        width="100vw"
-        height="100vh"
-        style={{ objectFit: 'cover' }}
-      />
-      <div className="absolute bottom-10 left-5">
-        <div className="font-bold text-lg">{video.title}</div>
-        <div className="text-sm opacity-80">par {video.artist?.name}</div>
-        <div className="text-xs mt-2 max-w-xs line-clamp-2">{video.description}</div>
-        <VideoSocialActions videoId={video._id} />
+      {/* Lecteur vidéo principal */}
+      <div className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4">
+        <ReactPlayer
+          url={video.url}
+          className="react-player"
+          playing={true}
+          controls={true}
+          width="100%"
+          height="auto"
+          onEnded={() => {
+            if (current < videos.length - 1) setCurrent(c => c + 1);
+            else setCurrent(0);
+          }}
+        />
       </div>
-      <div className="absolute top-5 right-5 text-lg">{current + 1} / {videos.length}</div>
-      {!hasMore && current === videos.length - 1 && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-gray-400 text-sm">Fin du feed</div>
-      )}
+      {/* Informations et actions sur la vidéo */}
+      <div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
+        <div className="text-3xl font-bold">{video.title}</div>
+        <div className="text-lg text-gray-400">{video.description}</div>
+        <div className="flex flex-wrap gap-2">
+          <div className="text-sm text-gray-500">Artiste : {video.artist?.name || 'Inconnu'}</div>
+          <div className="text-sm text-gray-500">Date : {new Date(video.createdAt).toLocaleString()}</div>
+          <div className="text-sm text-gray-500">ID : {video._id}</div>
+          <div className="text-sm text-gray-500">isValidated : {video.isValidated ? 'true' : 'false'}</div>
+        </div>
+        <VideoSocialActions video={video} />
+      </div>
     </div>
   );
 }
