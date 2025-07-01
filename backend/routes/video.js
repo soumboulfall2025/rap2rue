@@ -76,12 +76,16 @@ router.get('/my', auth, async (req, res) => {
   }
 });
 
-// Suppression d'une vidéo (artiste uniquement, propriétaire)
+// Suppression d'une vidéo (admin ou artiste propriétaire)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: 'Vidéo non trouvée.' });
-    if (video.artist.toString() !== req.user.id) return res.status(403).json({ message: 'Non autorisé.' });
+    const user = await User.findById(req.user.id);
+    // Autorisé si admin OU propriétaire
+    if (user.role !== 'admin' && video.artist.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Non autorisé.' });
+    }
     await video.deleteOne();
     res.json({ message: 'Vidéo supprimée.' });
   } catch (err) {

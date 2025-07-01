@@ -5,7 +5,8 @@ import VideoSocialActions from './VideoSocialActions';
 import { useSelector } from 'react-redux';
 import UploadVideo from './UploadVideo';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://rap2rue-backend.onrender.com/api/video';
+// Correction : API_URL doit être juste l'URL racine, le chemin /api/video est ajouté dans la requête
+const API_URL = import.meta.env.VITE_API_URL || 'https://rap2rue-backend.onrender.com';
 
 export default function VideoFeed() {
   const [videos, setVideos] = useState([]);
@@ -17,7 +18,9 @@ export default function VideoFeed() {
   const user = useSelector(state => state.user.user);
 
   useEffect(() => {
-    axios.get(API_URL + `?page=${page}&limit=10`)
+    const url = API_URL + '/api/video?page=' + page + '&limit=10';
+    console.log('API_URL utilisée:', url); // DEBUG
+    axios.get(url)
       .then(res => {
         const data = Array.isArray(res.data) ? res.data : [];
         console.log('Vidéos reçues du backend:', data); // DEBUG
@@ -94,28 +97,6 @@ export default function VideoFeed() {
   if (!Array.isArray(videos) || !videos.length) return <div className="flex justify-center items-center h-screen">Aucune vidéo</div>;
 
   const video = videos[current] || {};
-
-  // DEBUG : affichage de toutes les vidéos reçues
-  if (Array.isArray(videos) && videos.length > 0) {
-    return (
-      <div className="w-full min-h-screen bg-black text-white p-4">
-        <h2 className="text-2xl font-bold mb-4">Toutes les vidéos reçues du backend</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {videos.map((video, idx) => (
-            <div key={video._id} className="bg-[#232323] rounded-2xl shadow-xl p-4 flex flex-col gap-3 border-2 border-[#1DB954]/30">
-              <video src={video.url} controls className="w-full rounded-xl mb-2" />
-              <div className="text-lg font-bold">{video.title}</div>
-              <div className="text-gray-400 text-sm mb-1">{video.description}</div>
-              <div className="text-xs text-gray-500">Artiste : {video.artist?.name || 'Inconnu'}</div>
-              <div className="text-xs text-gray-500">Date : {new Date(video.createdAt).toLocaleString()}</div>
-              <div className="text-xs text-gray-500">ID : {video._id}</div>
-              <div className="text-xs text-gray-500">isValidated : {video.isValidated ? 'true' : 'false'}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-black text-white relative">

@@ -48,6 +48,22 @@ const AdminVideoValidation = ({ cardStyle }) => {
     }
   };
 
+  // Suppression d'une vidéo (admin)
+  const deleteVideo = async (id) => {
+    if (!window.confirm('Supprimer cette vidéo ?')) return;
+    try {
+      const res = await fetch(apiUrl(`/api/video/${id}`), {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      });
+      if (!res.ok) throw new Error();
+      setFeedback('Vidéo supprimée !');
+      setVideos(videos.filter(v => v._id !== id));
+    } catch (err) {
+      setFeedback("Erreur lors de la suppression.");
+    }
+  };
+
   if (loading) return <div>Chargement…</div>;
 
   if (!cardStyle) {
@@ -97,9 +113,14 @@ const AdminVideoValidation = ({ cardStyle }) => {
             </div>
             <div className="text-lg font-bold text-white">{video.title}</div>
             <div className="text-gray-400 text-sm mb-2">{video.description}</div>
-            <button onClick={() => validateVideo(video._id)} className="bg-[#1DB954] hover:bg-green-500 text-black font-bold px-4 py-2 rounded-full flex items-center gap-2 justify-center transition">
-              <FaCheckCircle /> Valider
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => validateVideo(video._id)} className="bg-[#1DB954] hover:bg-green-500 text-black font-bold px-4 py-2 rounded-full flex items-center gap-2 justify-center transition">
+                <FaCheckCircle /> Valider
+              </button>
+              <button onClick={() => deleteVideo(video._id)} className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-full flex items-center gap-2 justify-center transition">
+                Supprimer
+              </button>
+            </div>
           </div>
         ))
       )}
