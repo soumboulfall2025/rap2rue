@@ -11,6 +11,8 @@ const videoSchema = new mongoose.Schema({
     text: String,
     createdAt: { type: Date, default: Date.now }
   }],
+  isPaid: { type: Boolean, default: false }, // Ajout statut paiement
+  amountPaid: { type: Number, default: 0 }, // Montant payé
   createdAt: { type: Date, default: Date.now }
 });
 

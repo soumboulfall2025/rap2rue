@@ -10,7 +10,7 @@ router.use((req, res, next) => {
   next();
 });
 
-// Route publique : feed vidéo façon TikTok (pagination)
+// Route publique : feed vidéo façon TikTok (pagination, toutes vidéos)
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -48,7 +48,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Liste des vidéos d'un artiste (protégée)
+// Liste des vidéos d'un artiste (protégée, toutes vidéos)
 router.get('/my', auth, async (req, res) => {
   try {
     const videos = await Video.find({ artist: req.user.id }).sort({ createdAt: -1 });

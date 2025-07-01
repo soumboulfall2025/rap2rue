@@ -180,7 +180,8 @@ router.get('/artist-dashboard', auth, async (req, res) => {
 
     // Calculer le nombre total de ventes (nombre d'achats de ses musiques)
     const Order = require('../models/Order');
-    const orders = await Order.find({ 'items.musicId': { $in: musicIds } });
+    // On ne prend en compte que les commandes payées
+    const orders = await Order.find({ 'items.musicId': { $in: musicIds }, payment: true });
     let totalSales = 0;
     let totalRevenue = 0;
     // Calcul des ventes et revenus par musique
