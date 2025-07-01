@@ -137,7 +137,7 @@ export default function VideoFeed() {
           url={video.url}
           className="react-player"
           playing={true}
-          muted={!user || user.role !== 'admin'}
+          muted={true} // Toujours muted pour autoplay sans erreur navigateur
           controls={false} // TikTok: pas de contrôles natifs
           width="100%"
           height="auto"

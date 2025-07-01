@@ -52,8 +52,9 @@ export default function VideoSocialActions({ video }) {
       await axios.post(`/api/video/${videoId}/comment`, { text: comment }, { headers: { Authorization: 'Bearer ' + token } });
       setComment('');
       const res = await axios.get(`/api/video/${videoId}/comments`);
-      setComments(res.data);
-      setStats(s => ({ ...s, comments: res.data.length }));
+      const commentsArray = Array.isArray(res.data) ? res.data : [];
+      setComments(commentsArray);
+      setStats(s => ({ ...s, comments: commentsArray.length }));
     } finally {
       setLoading(false);
     }
