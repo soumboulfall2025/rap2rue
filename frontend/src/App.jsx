@@ -286,7 +286,7 @@ function MobileNavLink({ to, label, icon }) {
   return (
     <Link
       to={to}
-      className={`flex flex-col items-center justify-center flex-1 text-white hover:text-[#1DB954] transition focus:outline-none focus:ring-2 focus:ring-[#1DB954] ${isActive ? 'text-[#1DB954] font-bold' : ''}`}
+      className={`mobile-nav-link flex flex-col items-center justify-center flex-1 text-white hover:text-[#1DB954] transition focus:outline-none focus:ring-2 focus:ring-[#1DB954] ${isActive ? 'text-[#1DB954] font-bold' : ''}`}
     >
       <span className="text-2xl mb-0.5">{icon}</span>
       <span className="text-xs font-semibold">{label}</span>
@@ -299,7 +299,7 @@ function MobileNavAction({ label, icon, onClick, color = '' }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center justify-center text-white hover:text-red-500 transition focus:outline-none focus:ring-2 focus:ring-red-500 bg-transparent border-0 ${color}`}
+      className={`mobile-nav-action flex flex-col items-center justify-center text-white hover:text-red-500 transition focus:outline-none focus:ring-2 focus:ring-red-500 bg-transparent border-0 ${color}`}
       aria-label={label}
       style={{ background: 'transparent' }}
     >
