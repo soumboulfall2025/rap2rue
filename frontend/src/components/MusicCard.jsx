@@ -44,6 +44,7 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
 
   // Seul l'admin peut écouter l'intégralité, tous les autres (fans/artistes) sont limités à 30s
   const isAdmin = music.userRole === 'admin';
+  console.log('userRole:', music.userRole, 'title:', music.title);
 
   return (
     <div className={`bg-[#181818] rounded-xl shadow-lg p-4 flex flex-col items-center w-full max-w-xs mx-auto hover:scale-105 transition-transform duration-200 ${isActive ? 'ring-4 ring-[#1ed760]' : ''}`}>
