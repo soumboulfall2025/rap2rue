@@ -138,7 +138,7 @@ export default function VideoFeed() {
           className="react-player"
           playing={true}
           muted={!user || user.role !== 'admin'}
-          controls={true}
+          controls={false} // TikTok: pas de contrôles natifs
           width="100%"
           height="auto"
           onEnded={() => {

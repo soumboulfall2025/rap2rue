@@ -108,7 +108,7 @@ export default function VideoSocialActions({ video }) {
               {comments.length === 0 && <div className="text-gray-400">Aucun commentaire</div>}
             </div>
             <form onSubmit={handleComment} className="mt-4 flex gap-2">
-              <input value={comment} onChange={e => setComment(e.target.value)} className="border rounded p-2 flex-1 bg-gray-900 text-white" placeholder="Ajouter un commentaire..." />
+              <input value={comment} onChange={e => setComment(e.target.value)} className="border border-gray-700 rounded p-2 flex-1 bg-black/80 text-white placeholder-gray-400" placeholder="Ajouter un commentaire..." />
               <button type="submit" className="bg-accent text-white px-4 py-2 rounded" disabled={loading}>Envoyer</button>
             </form>
           </div>
