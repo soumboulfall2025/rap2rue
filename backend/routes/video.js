@@ -4,6 +4,12 @@ const User = require('../models/User');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
+// Middleware de log global pour toutes les requêtes
+router.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // Route publique : feed vidéo façon TikTok (pagination)
 router.get('/', async (req, res) => {
   try {
