@@ -1,13 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { login } from "../store/userSlice";
 import { apiUrl } from "../utils/api";
+import ChooseRole from "./ChooseRole";
 
 export default function SocialCallback() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const [needRole, setNeedRole] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -21,8 +24,13 @@ export default function SocialCallback() {
         .then((res) => res.json())
         .then((data) => {
           if (data && data.user) {
-            dispatch(login({ user: data.user, role: data.user.role }));
-            navigate("/explore");
+            setUser(data.user);
+            if (!data.user.role || !["fan", "artist"].includes(data.user.role)) {
+              setNeedRole(true);
+            } else {
+              dispatch(login({ user: data.user, role: data.user.role }));
+              navigate("/explore");
+            }
           } else {
             navigate("/login");
           }
@@ -32,6 +40,17 @@ export default function SocialCallback() {
       navigate("/login");
     }
   }, [dispatch, navigate, location]);
+
+  if (needRole && user) {
+    return (
+      <ChooseRole
+        onRoleSet={(role) => {
+          dispatch(login({ user: { ...user, role }, role }));
+          navigate("/explore");
+        }}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-white">

@@ -184,4 +184,17 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// Permettre à un utilisateur social de choisir son rôle après inscription
+router.patch('/social-role', auth, async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!['fan', 'artist'].includes(role)) return res.status(400).json({ message: 'Rôle invalide.' });
+    const user = await User.findByIdAndUpdate(req.user.id, { role }, { new: true });
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 module.exports = router;

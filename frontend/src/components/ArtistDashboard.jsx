@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { apiUrl } from "../utils/api";
 import { useSelector } from 'react-redux';
+import UploadVideo from './UploadVideo';
+import MyVideos from './MyVideos';
 
 export default function ArtistDashboard() {
   const user = useSelector(state => state.user.user);
@@ -102,6 +104,13 @@ export default function ArtistDashboard() {
           </div>
         </div>
       )}
+      {/* Upload vidéo TikTok-like */}
+      <div className="mt-12">
+        <h3 className="text-2xl font-bold mb-4 text-accent">Uploader une vidéo TikTok</h3>
+        <UploadVideo onUpload={() => window.location.reload()} />
+      </div>
+      {/* Liste des vidéos TikTok de l'artiste */}
+      <MyVideos />
     </div>
   );
 }

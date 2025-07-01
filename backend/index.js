@@ -8,6 +8,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const musicRoutes = require('./routes/music');
 const paymentRoutes = require('./routes/payment');
+const videoRoutes = require('./routes/video');
 const allowedOrigins = [
   'http://localhost:5173', // ton frontend local
   'https://rap2rue-frontend.onrender.com' // ton frontend déployé
@@ -35,6 +36,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/music', musicRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/video', videoRoutes);
 // --- ROUTES ADMIN ---
 app.use('/api/admin', require('./routes/admin'));
 
