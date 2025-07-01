@@ -58,6 +58,7 @@ router.patch('/:id/validate', auth, async (req, res) => {
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: 'Vidéo non trouvée.' });
     video.isValidated = true;
+    video.createdAt = new Date(); // Met à jour la date pour remonter la vidéo en haut du feed
     await video.save();
     res.json({ message: 'Vidéo validée.', video });
   } catch (err) {
