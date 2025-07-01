@@ -97,6 +97,7 @@ export default function VideoFeed() {
   if (!Array.isArray(videos) || !videos.length) return <div className="flex justify-center items-center h-screen">Aucune vidéo</div>;
 
   const video = videos[current] || {};
+  const isValidUrl = video.url && (video.url.startsWith('http://') || video.url.startsWith('https://')) && (video.url.endsWith('.mp4') || video.url.includes('cloudinary') || video.url.includes('video'));
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center bg-black text-white relative">
@@ -132,21 +133,28 @@ export default function VideoFeed() {
         </div>
       )}
       {/* Lecteur vidéo principal */}
-      <div className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4 relative">
-        <ReactPlayer
-          url={video.url}
-          className="react-player"
-          playing={true}
-          muted={true} // Toujours muted pour autoplay sans erreur navigateur
-          controls={false} // TikTok: pas de contrôles natifs
-          width="100%"
-          height="auto"
-          onEnded={() => {
-            if (current < videos.length - 1) setCurrent(c => c + 1);
-            else setCurrent(0);
-          }}
-        />
-        {user && user.role !== 'admin' && (
+      <div className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4 relative min-h-[300px] flex items-center justify-center">
+        {isValidUrl ? (
+          <ReactPlayer
+            url={video.url}
+            className="react-player"
+            playing={true}
+            muted={true} // Toujours muted pour autoplay sans erreur navigateur
+            controls={false} // TikTok: pas de contrôles natifs
+            width="100%"
+            height="auto"
+            onEnded={() => {
+              if (current < videos.length - 1) setCurrent(c => c + 1);
+              else setCurrent(0);
+            }}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center w-full h-full p-8">
+            <div className="text-red-500 text-lg font-bold mb-2">Vidéo non disponible ou format non supporté</div>
+            <div className="text-xs break-all text-gray-400">{video.url ? video.url : 'Aucune URL vidéo trouvée.'}</div>
+          </div>
+        )}
+        {user && user.role !== 'admin' && isValidUrl && (
           <div className="absolute top-4 right-4 z-20">
             <span className="bg-black/70 text-white px-3 py-1 rounded-full text-xs">
               Appuyez sur l'icône son pour activer l'audio
@@ -154,7 +162,7 @@ export default function VideoFeed() {
           </div>
         )}
         {/* Overlay TikTok social actions */}
-        <VideoSocialActions video={video} />
+        {isValidUrl && <VideoSocialActions video={video} />}
       </div>
       {/* Informations et actions sur la vidéo */}
       <div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
