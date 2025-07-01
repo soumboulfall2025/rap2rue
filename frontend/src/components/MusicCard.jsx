@@ -11,25 +11,27 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
   const previewLimit = 30; // 30 secondes max si non acheté
 
   useEffect(() => {
-    let interval;
-    function sync() {
-      if (window._audio && window._audio.src === music.audioUrl) {
+    function handleTimeUpdate() {
+      if (window._audio && window._audio.src === music.audioUrl && isActive) {
         setCurrentTime(window._audio.currentTime);
         setDuration(window._audio.duration || 0);
-        // Limite la lecture à 30s si non acheté
         if (!music.isBought && window._audio.currentTime >= previewLimit) {
           window._audio.pause();
           window._audio.currentTime = 0;
         }
       }
     }
-    if (isActive) {
-      interval = setInterval(sync, 300);
-    } else {
-      setCurrentTime(0);
-      setDuration(0);
+    if (isActive && window._audio) {
+      window._audio.addEventListener('timeupdate', handleTimeUpdate);
+      // Mise à jour initiale
+      setCurrentTime(window._audio.currentTime);
+      setDuration(window._audio.duration || 0);
     }
-    return () => interval && clearInterval(interval);
+    return () => {
+      if (window._audio) {
+        window._audio.removeEventListener('timeupdate', handleTimeUpdate);
+      }
+    };
   }, [isActive, music.audioUrl, music.isBought]);
 
   const formatTime = s => {
@@ -38,6 +40,9 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
     const sec = Math.floor(s % 60).toString().padStart(2, '0');
     return `${m}:${sec}`;
   };
+
+  // Seul l'admin peut écouter l'intégralité, tous les autres (fans/artistes) sont limités à 30s
+  const isAdmin = music.userRole === 'admin';
 
   return (
     <div className={`bg-[#181818] rounded-xl shadow-lg p-4 flex flex-col items-center w-full max-w-xs mx-auto hover:scale-105 transition-transform duration-200 ${isActive ? 'ring-4 ring-[#1ed760]' : ''}`}>
@@ -92,20 +97,33 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
         <input
           type="range"
           min={0}
-          max={music.isBought ? (duration || 1) : previewLimit}
+          max={isAdmin ? (duration || 1) : previewLimit}
           value={currentTime}
           onChange={e => {
-            if (window._audio && window._audio.src === music.audioUrl) {
-              window._audio.currentTime = Number(e.target.value);
-              setCurrentTime(Number(e.target.value));
+            let val = Number(e.target.value);
+            // Empêche le seek au-delà de 30s si non admin
+            if (!isAdmin && val > previewLimit) val = previewLimit;
+            if (window._audio && window._audio.src === music.audioUrl && isActive) {
+              window._audio.currentTime = val;
+              setCurrentTime(val);
+              // Si on tente de seek au-delà de 30s, on stoppe
+              if (!isAdmin && val >= previewLimit) {
+                window._audio.pause();
+                window._audio.currentTime = 0;
+              }
             }
           }}
           className="w-full accent-green-500"
         />
         <div className="flex justify-between w-full text-xs text-gray-400 mt-1">
           <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(music.isBought ? duration : previewLimit)}</span>
+          <span>{formatTime(isAdmin ? duration : previewLimit)}</span>
         </div>
+        {!isAdmin && (
+          <div className="text-xs text-yellow-400 mt-1 text-center w-full">
+            Pré-écoute limitée à 30 secondes. Seul l'administrateur peut écouter l'intégralité.
+          </div>
+        )}
       </div>
     </div>
   );

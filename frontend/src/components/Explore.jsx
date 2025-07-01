@@ -69,6 +69,7 @@ export default function Explore() {
               isBought: user?.library?.includes(music._id) || false,
               audioUrl: music.audioUrl,
               _id: music._id,
+              userRole: user?.role || 'fan',
             }}
             onPlay={() => {
               if (!window._audio) window._audio = new Audio();
