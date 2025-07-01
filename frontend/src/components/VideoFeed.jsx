@@ -136,6 +136,7 @@ export default function VideoFeed() {
       <div className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4 relative min-h-[300px] flex items-center justify-center">
         {isValidUrl ? (
           <ReactPlayer
+            key={video._id || video.url}
             url={video.url}
             className="react-player"
             playing={true}
