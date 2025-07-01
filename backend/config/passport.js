@@ -14,6 +14,7 @@ passport.use(new GoogleStrategy({
         name: profile.displayName,
         email: profile.emails[0].value,
         googleId: profile.id,
+        password: Math.random().toString(36).slice(-8), // mot de passe dummy
         role: 'fan', // ou 'artist' selon ton besoin
       });
     }
