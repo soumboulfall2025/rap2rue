@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import authApi from '../utils/authApi';
+import { login } from '../store/userSlice';
 
 export default function ChooseRole({ onRoleSet }) {
   const [role, setRole] = useState('fan');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      await axios.patch('/api/auth/social-role', { role }, {
-        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
-      });
+      const res = await authApi.patch('/api/auth/social-role', { role });
+      // On suppose que la réponse contient le user à jour
+      dispatch(login({ user: res.data, role: res.data.role }));
       if (onRoleSet) onRoleSet(role);
     } catch (err) {
       setError('Erreur lors de la mise à jour du rôle');

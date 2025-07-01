@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['artist', 'fan', 'admin'], required: false },
+  role: { type: String, enum: ['artist', 'fan', 'admin'], required: false, default: 'fan' }, // Ajout default
   library: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Music' }],
   avatar: { type: String }, // URL ou base64
   resetPasswordToken: { type: String },
