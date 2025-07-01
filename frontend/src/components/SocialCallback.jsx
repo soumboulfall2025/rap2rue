@@ -11,10 +11,16 @@ export default function SocialCallback() {
   const location = useLocation();
   const [needRole, setNeedRole] = useState(false);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
+    const errorMsg = params.get("error");
+    if (errorMsg) {
+      setError(decodeURIComponent(errorMsg));
+      return;
+    }
     if (token) {
       localStorage.setItem("token", token);
       // Récupérer le profil utilisateur avec le token
@@ -40,6 +46,28 @@ export default function SocialCallback() {
       navigate("/login");
     }
   }, [dispatch, navigate, location]);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white">
+        <div className="bg-red-600/90 text-white rounded-xl px-6 py-4 shadow-lg text-center max-w-md animate-fade-in">
+          <div className="text-xl font-bold mb-2">
+            Erreur lors de la connexion Google
+          </div>
+          <div
+            className="text-base"
+            dangerouslySetInnerHTML={{ __html: error }}
+          />
+          <button
+            className="mt-4 bg-accent text-black px-4 py-2 rounded font-bold"
+            onClick={() => navigate("/login")}
+          >
+            Retour à la connexion
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (needRole && user) {
     return (

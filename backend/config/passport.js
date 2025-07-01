@@ -10,13 +10,13 @@ passport.use(new GoogleStrategy({
   try {
     // Vérifie si un utilisateur existe déjà avec cet email (inscription classique)
     const email = profile.emails && profile.emails[0] && profile.emails[0].value;
-    if (!email) return done(new Error('Aucun email Google trouvé'), null);
+    if (!email) return done(null, false, { message: 'Votre compte Google ne fournit pas d’email.' });
     let user = await User.findOne({ googleId: profile.id });
     if (!user) {
       // Bloque si un user existe déjà avec cet email (inscription classique)
       const existingEmail = await User.findOne({ email });
       if (existingEmail) {
-        return done(new Error('Un compte existe déjà avec cet email. Connecte-toi avec ton mot de passe.'), null);
+        return done(null, false, { message: 'Un compte existe déjà avec cet email. <b>Connecte-toi avec ton mot de passe</b> ou utilise la récupération de mot de passe.' });
       }
       user = await User.create({
         name: profile.displayName,

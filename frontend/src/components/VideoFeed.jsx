@@ -61,6 +61,13 @@ export default function VideoFeed() {
     };
   }, [current, videos.length, hasMore]);
 
+  // Ajout d'un effet pour recharger les vidéos après upload
+  useEffect(() => {
+    if (showUpload === false) {
+      setPage(1);
+    }
+  }, [showUpload]);
+
   if (!Array.isArray(videos) || !videos.length) return <div className="flex justify-center items-center h-screen">Aucune vidéo</div>;
 
   const video = videos[current] || {};
@@ -82,7 +89,7 @@ export default function VideoFeed() {
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
           <div className="bg-[#18181b] rounded-xl p-6 shadow-xl w-full max-w-md relative animate-fade-in">
             <button onClick={() => setShowUpload(false)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl">&times;</button>
-            <UploadVideo onUpload={() => { setShowUpload(false); setPage(1); }} />
+            <UploadVideo onUpload={() => setShowUpload(false)} />
           </div>
         </div>
       )}
