@@ -24,7 +24,9 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json());
+// Augmente la limite à 50mb pour les uploads volumineux
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.get('/', (req, res) => {
   res.send('API RAP2RUE opérationnelle');
