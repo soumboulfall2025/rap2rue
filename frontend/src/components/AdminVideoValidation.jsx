@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaUser, FaCheckCircle, FaClock } from 'react-icons/fa';
-import api from '../utils/api';
+import { apiUrl } from '../utils/api';
 
 const AdminVideoValidation = ({ cardStyle }) => {
   const [videos, setVideos] = useState([]);
@@ -11,8 +11,11 @@ const AdminVideoValidation = ({ cardStyle }) => {
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/video/all?validated=false');
-      setVideos(res.data);
+      const res = await fetch(apiUrl('/video/all?validated=false'), {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      });
+      if (!res.ok) throw new Error();
+      setVideos(await res.json());
     } catch (err) {
       setFeedback("Erreur lors du chargement des vidéos.");
     }
@@ -26,7 +29,11 @@ const AdminVideoValidation = ({ cardStyle }) => {
   // Valide une vidéo
   const validateVideo = async (id) => {
     try {
-      await api.patch(`/video/${id}/validate`);
+      const res = await fetch(apiUrl(`/video/${id}/validate`), {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      });
+      if (!res.ok) throw new Error();
       setFeedback('Vidéo validée !');
       setVideos(videos.filter(v => v._id !== id));
     } catch (err) {
