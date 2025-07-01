@@ -6,12 +6,14 @@ const AdminVideoValidation = ({ cardStyle }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState('');
+  // Ajout d'un filtre pour voir toutes les vidéos (validées ou non)
+  const [showAll, setShowAll] = useState(false);
 
-  // Récupère les vidéos non validées
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(apiUrl('/api/video/all?validated=false'), {
+      const url = showAll ? '/api/video/all' : '/api/video/all?validated=false';
+      const res = await fetch(apiUrl(url), {
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
       });
       if (!res.ok) {
@@ -27,7 +29,8 @@ const AdminVideoValidation = ({ cardStyle }) => {
 
   useEffect(() => {
     fetchVideos();
-  }, []);
+    // eslint-disable-next-line
+  }, [showAll]);
 
   // Valide une vidéo
   const validateVideo = async (id) => {
@@ -94,36 +97,42 @@ const AdminVideoValidation = ({ cardStyle }) => {
 
   // Version "cool" façon Spotify/Snapchat
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {feedback && <div className="col-span-full text-[#1DB954] font-bold mb-2">{feedback}</div>}
-      {videos.length === 0 ? (
-        <div className="col-span-full text-gray-400 text-center py-8">Aucune vidéo en attente de validation.</div>
-      ) : (
-        videos.map(video => (
-          <div key={video._id} className="bg-[#232323] rounded-2xl shadow-xl p-4 flex flex-col gap-3 border-2 border-[#1DB954]/30 hover:scale-[1.025] transition-transform">
-            <div className="relative rounded-xl overflow-hidden aspect-video bg-black">
-              <video src={video.url} controls className="w-full h-full object-cover" />
-              <div className="absolute top-2 left-2 bg-[#1DB954] text-black px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                <FaClock className="inline mr-1" /> En attente
+    <div>
+      <div className="flex gap-4 mb-4">
+        <button onClick={() => setShowAll(false)} className={`px-4 py-2 rounded-full font-bold ${!showAll ? 'bg-[#1DB954] text-black' : 'bg-gray-700 text-white'}`}>À valider</button>
+        <button onClick={() => setShowAll(true)} className={`px-4 py-2 rounded-full font-bold ${showAll ? 'bg-[#1DB954] text-black' : 'bg-gray-700 text-white'}`}>Toutes les vidéos</button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {feedback && <div className="col-span-full text-[#1DB954] font-bold mb-2">{feedback}</div>}
+        {videos.length === 0 ? (
+          <div className="col-span-full text-gray-400 text-center py-8">Aucune vidéo en attente de validation.</div>
+        ) : (
+          videos.map(video => (
+            <div key={video._id} className="bg-[#232323] rounded-2xl shadow-xl p-4 flex flex-col gap-3 border-2 border-[#1DB954]/30 hover:scale-[1.025] transition-transform">
+              <div className="relative rounded-xl overflow-hidden aspect-video bg-black">
+                <video src={video.url} controls className="w-full h-full object-cover" />
+                <div className="absolute top-2 left-2 bg-[#1DB954] text-black px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                  <FaClock className="inline mr-1" /> En attente
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <FaUser className="text-[#1DB954]" />
+                <span className="text-white font-semibold">{video.artist?.name || 'Artiste inconnu'}</span>
+              </div>
+              <div className="text-lg font-bold text-white">{video.title}</div>
+              <div className="text-gray-400 text-sm mb-2">{video.description}</div>
+              <div className="flex gap-2">
+                <button onClick={() => validateVideo(video._id)} className="bg-[#1DB954] hover:bg-green-500 text-black font-bold px-4 py-2 rounded-full flex items-center gap-2 justify-center transition">
+                  <FaCheckCircle /> Valider
+                </button>
+                <button onClick={() => deleteVideo(video._id)} className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-full flex items-center gap-2 justify-center transition">
+                  Supprimer
+                </button>
               </div>
             </div>
-            <div className="flex items-center gap-2 mt-2">
-              <FaUser className="text-[#1DB954]" />
-              <span className="text-white font-semibold">{video.artist?.name || 'Artiste inconnu'}</span>
-            </div>
-            <div className="text-lg font-bold text-white">{video.title}</div>
-            <div className="text-gray-400 text-sm mb-2">{video.description}</div>
-            <div className="flex gap-2">
-              <button onClick={() => validateVideo(video._id)} className="bg-[#1DB954] hover:bg-green-500 text-black font-bold px-4 py-2 rounded-full flex items-center gap-2 justify-center transition">
-                <FaCheckCircle /> Valider
-              </button>
-              <button onClick={() => deleteVideo(video._id)} className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-full flex items-center gap-2 justify-center transition">
-                Supprimer
-              </button>
-            </div>
-          </div>
-        ))
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };

@@ -132,11 +132,12 @@ export default function VideoFeed() {
         </div>
       )}
       {/* Lecteur vidéo principal */}
-      <div className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4">
+      <div className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4 relative">
         <ReactPlayer
           url={video.url}
           className="react-player"
           playing={true}
+          muted={!user || user.role !== 'admin'}
           controls={true}
           width="100%"
           height="auto"
@@ -145,6 +146,15 @@ export default function VideoFeed() {
             else setCurrent(0);
           }}
         />
+        {user && user.role !== 'admin' && (
+          <div className="absolute top-4 right-4 z-20">
+            <span className="bg-black/70 text-white px-3 py-1 rounded-full text-xs">
+              Appuyez sur l'icône son pour activer l'audio
+            </span>
+          </div>
+        )}
+        {/* Overlay TikTok social actions */}
+        <VideoSocialActions video={video} />
       </div>
       {/* Informations et actions sur la vidéo */}
       <div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
@@ -156,7 +166,7 @@ export default function VideoFeed() {
           <div className="text-sm text-gray-500">ID : {video._id}</div>
           <div className="text-sm text-gray-500">isValidated : {video.isValidated ? 'true' : 'false'}</div>
         </div>
-        <VideoSocialActions video={video} />
+        {/* VideoSocialActions supprimé ici, car déplacé en overlay */}
       </div>
     </div>
   );
