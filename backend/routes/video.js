@@ -34,8 +34,10 @@ router.post('/', auth, async (req, res) => {
       url,
       artist: user._id
     });
+    console.log('Vidéo créée :', video); // LOG création vidéo
     res.status(201).json(video);
   } catch (err) {
+    console.error('Erreur upload vidéo :', err); // LOG erreur
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
