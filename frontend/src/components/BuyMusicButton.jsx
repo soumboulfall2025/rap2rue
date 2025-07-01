@@ -6,10 +6,12 @@ import { useOutletContext } from 'react-router-dom';
 function BuyMusicButton({ music }) {
   const user = useSelector((state) => state.user.user);
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
   const [_, setGlobalLoading] = useOutletContext?.() || [null, null];
 
   const handleBuy = async () => {
     setLoading(true);
+    setFeedback("");
     if (setGlobalLoading) setGlobalLoading(true);
     try {
       const res = await fetch(apiUrl("/api/payment/paydunya"), {
@@ -36,23 +38,28 @@ function BuyMusicButton({ music }) {
       if (data.success && data.redirectUrl) {
         window.location.href = data.redirectUrl; // Redirection PayDunya
       } else {
-        alert(data.message || "Erreur lors de la création du paiement.");
+        setFeedback((data.message || "Erreur lors de la création du paiement.") + (data.error ? `\n${data.error}` : ""));
       }
     } catch (e) {
-      alert("Erreur serveur.");
+      setFeedback("Erreur serveur.");
     }
     setLoading(false);
     if (setGlobalLoading) setGlobalLoading(false);
   };
 
   return (
-    <button
-      onClick={handleBuy}
-      disabled={loading}
-      className="px-6 py-2 rounded bg-accent text-[#18181b] font-bold hover:bg-white transition"
-    >
-      {loading ? "Redirection..." : "Acheter"}
-    </button>
+    <div className="w-full flex flex-col items-center">
+      <button
+        onClick={handleBuy}
+        disabled={loading}
+        className="px-6 py-2 rounded bg-accent text-[#18181b] font-bold hover:bg-accent transition"
+      >
+        {loading ? "Redirection..." : "Acheter"}
+      </button>
+      {feedback && (
+        <div className="mt-2 text-sm text-center text-red-500 bg-[#232323] rounded px-2 py-1 w-full max-w-xs">{feedback}</div>
+      )}
+    </div>
   );
 }
 

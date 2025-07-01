@@ -8,9 +8,20 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const musicRoutes = require('./routes/music');
 const paymentRoutes = require('./routes/payment');
+const allowedOrigins = [
+  'http://localhost:5173', // ton frontend local
+  'https://rap2rue-frontend.onrender.com' // ton frontend déployé
+];
 
 app.use(cors({
-  origin: 'https://rap2rue-frontend.onrender.com', // ou '*' pour tout autoriser (moins sécurisé)
+  origin: function(origin, callback){
+    // autorise les requêtes sans origin (ex. Postman) ou si l'origine est dans allowedOrigins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());

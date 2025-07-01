@@ -4,6 +4,7 @@ import { apiUrl } from '../utils/api';
 import BuyMusicButton from './BuyMusicButton';
 import MusicReviews from './MusicReviews';
 import MusicReviewForm from './MusicReviewForm';
+import MusicCard from './MusicCard';
 
 export default function Explore() {
   const [musics, setMusics] = useState([]);
@@ -54,44 +55,57 @@ export default function Explore() {
       {loading && <div className="text-center">Chargement...</div>}
       {error && <div className="text-center text-red-500">{error}</div>}
       {buyMsg && <div className="text-center text-accent font-bold mb-4">{buyMsg}</div>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {musics.map(music => (
-            <div key={music._id} className="bg-[#232323] rounded-lg shadow p-4 flex flex-col md:flex-row items-center">
-              <img src={music.coverUrl} alt={music.title} className="w-32 h-32 object-cover rounded mb-4 md:mb-0 md:mr-6" />
-              <div className="flex-1">
-                <h3 className="text-xl font-bold mb-1">{music.title}</h3>
-                <div className="text-accent font-semibold mb-1">{music.genre}</div>
-                <div className="mb-1">Artiste : <span className="font-semibold">{music.artist?.name || 'Inconnu'}</span></div>
-                <div className="mb-1">Prix : <span className="font-semibold">{music.price} €</span></div>
-                <div className="mb-2 text-sm text-gray-300">{music.description}</div>
-                {/* Audio preview 30s pour les non-acheteurs, complet sinon */}
-                {user && user.role === 'fan' && !user.library?.includes(music._id) && user.id !== music.artist?._id && (
-                  <BuyMusicButton music={music} />
-                )}
-                {user?.library?.includes(music._id) || user?.id === music.artist?._id ? (
-                  <audio controls src={music.audioUrl} className="w-full mt-2" preload="none" controlsList="nodownload">
-                    Votre navigateur ne supporte pas l'audio.
-                  </audio>
-                ) : (
-                  <audio
-                    controls
-                    src={music.audioUrl}
-                    className="w-full mt-2"
-                    preload="none"
-                    controlsList="nodownload"
-                    onTimeUpdate={e => {
-                      if (e.target.currentTime > 30) e.target.currentTime = 0;
-                    }}
-                  >
-                    Votre navigateur ne supporte pas l'audio.
-                  </audio>
-                )}
-                <MusicReviews musicId={music._id} refresh={refreshReviews[music._id] || 0} />
-                {user?.library?.includes(music._id) && (
-                  <MusicReviewForm musicId={music._id} onReviewAdded={() => setRefreshReviews(r => ({ ...r, [music._id]: (r[music._id] || 0) + 1 }))} />
-                )}
-              </div>
-            </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        {musics.map((music, idx) => (
+          <MusicCard
+            key={music._id}
+            music={{
+              ...music,
+              cover: music.coverUrl,
+              title: music.title,
+              artist: music.artist?.name || 'Inconnu',
+              price: music.price,
+              description: music.description,
+              isBought: user?.library?.includes(music._id) || false,
+              audioUrl: music.audioUrl,
+              _id: music._id,
+            }}
+            onPlay={() => {
+              if (!window._audio) window._audio = new Audio();
+              window._audio.src = music.audioUrl;
+              window._audio.play();
+              window._currentMusicId = music._id;
+              window.dispatchEvent(new CustomEvent('music:change', { detail: { id: music._id } }));
+            }}
+            onPause={() => {
+              if (window._audio) window._audio.pause();
+            }}
+            onPrev={() => {
+              if (idx > 0) {
+                const prev = musics[idx - 1];
+                if (!window._audio) window._audio = new Audio();
+                window._audio.src = prev.audioUrl;
+                window._audio.play();
+                window._currentMusicId = prev._id;
+                window.dispatchEvent(new CustomEvent('music:change', { detail: { id: prev._id } }));
+              }
+            }}
+            onNext={() => {
+              if (idx < musics.length - 1) {
+                const next = musics[idx + 1];
+                if (!window._audio) window._audio = new Audio();
+                window._audio.src = next.audioUrl;
+                window._audio.play();
+                window._currentMusicId = next._id;
+                window.dispatchEvent(new CustomEvent('music:change', { detail: { id: next._id } }));
+              }
+            }}
+            onLike={() => {/* TODO: gestion favoris */}}
+            liked={user?.library?.includes(music._id)}
+            isActive={window._currentMusicId === music._id}
+            price={music.price}
+            description={music.description}
+          />
         ))}
       </div>
       {musics.length === 0 && !loading && !error && (

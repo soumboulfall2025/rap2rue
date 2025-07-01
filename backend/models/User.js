@@ -4,8 +4,11 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['artist', 'fan'], required: true },
+  role: { type: String, enum: ['artist', 'fan', 'admin'], required: true },
   library: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Music' }],
+  avatar: { type: String }, // URL ou base64
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

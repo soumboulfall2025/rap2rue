@@ -53,7 +53,7 @@ function MusicReviewForm({ musicId, onReviewAdded }) {
         onChange={e => setComment(e.target.value)}
         required
       />
-      <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-accent text-[#18181b] font-bold hover:bg-white transition">
+      <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-accent text-[#18181b] font-bold hover:bg-accent transition">
         {loading ? "Envoi..." : "Envoyer"}
       </button>
       {msg && <div className="mt-2 text-accent font-bold">{msg}</div>}

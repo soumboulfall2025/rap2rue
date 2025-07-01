@@ -1,8 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { sendMail } = require('../utils/mailer');
 
 const router = express.Router();
 
@@ -60,6 +62,95 @@ router.get('/library', auth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
+});
+
+// Modifier le profil (nom/email/avatar)
+router.patch('/profile', auth, async (req, res) => {
+  try {
+    const { name, email, avatar } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Nom et email requis.' });
+    }
+    // Vérifier si l'email est déjà pris par un autre utilisateur
+    const existing = await User.findOne({ email, _id: { $ne: req.user.id } });
+    if (existing) {
+      return res.status(409).json({ message: 'Cet email est déjà utilisé.' });
+    }
+    const update = { name, email };
+    if (avatar) update.avatar = avatar;
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      update,
+      { new: true, runValidators: true, select: '-password' }
+    );
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// Changer le mot de passe
+router.patch('/password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      console.error('Champs manquants:', req.body);
+      return res.status(400).json({ message: 'Champs requis.' });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      console.error('Utilisateur non trouvé:', req.user.id);
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      console.error('Mot de passe actuel incorrect pour user', req.user.id);
+      return res.status(401).json({ message: 'Mot de passe actuel incorrect.' });
+    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    res.json({ message: 'Mot de passe modifié.' });
+  } catch (err) {
+    console.error('Erreur serveur changement mot de passe:', err);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// Demande de réinitialisation de mot de passe
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email requis.' });
+  const user = await User.findOne({ email });
+  if (!user) return res.status(200).json({ message: 'Si cet email existe, un lien a été envoyé.' });
+  const token = crypto.randomBytes(32).toString('hex');
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = Date.now() + 1000 * 60 * 30; // 30 min
+  await user.save();
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
+  await sendMail({
+    to: user.email,
+    subject: 'Réinitialisation de mot de passe',
+    html: `<p>Pour réinitialiser votre mot de passe, cliquez sur ce lien : <a href="${resetUrl}">${resetUrl}</a></p>`
+  });
+  res.json({ message: 'Si cet email existe, un lien a été envoyé.' });
+});
+
+// Réinitialisation du mot de passe
+router.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  if (!password) return res.status(400).json({ message: 'Mot de passe requis.' });
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+  if (!user) return res.status(400).json({ message: 'Lien invalide ou expiré.' });
+  user.password = await bcrypt.hash(password, 10);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+  res.json({ message: 'Mot de passe réinitialisé.' });
 });
 
 module.exports = router;

@@ -68,6 +68,14 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
           />
+          <div className="text-right mt-1">
+            <a
+              href="/forgot-password"
+              className="text-accent text-xs hover:underline"
+            >
+              Mot de passe oublié&nbsp;?
+            </a>
+          </div>
         </div>
         {error && (
           <div className="mb-4 text-red-500 text-sm text-center">{error}</div>

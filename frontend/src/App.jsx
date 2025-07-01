@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import './App.css'
 import UserStatus from './components/UserStatus';
 import Login from './components/Login';
@@ -13,17 +13,27 @@ import PrivateRoute from './components/PrivateRoute';
 import ArtistRoute from './components/ArtistRoute';
 import ArtistDashboard from './components/ArtistDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import { logout } from './store/userSlice';
+import { apiUrl } from './utils/api';
+import { login } from './store/userSlice';
 import logo from './assets/react.jpeg';
 import background from './assets/background.jpeg';
+import EditProfileModal from './components/EditProfileModal';
+import ChangePasswordModal from './components/ChangePasswordModal';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 
 function App() {
-  const [count, setCount] = useState(0)
   const user = useSelector(state => state.user.user);
-  const [navOpen, setNavOpen] = useState(false);
+  const dispatch = useDispatch();
   const [showWelcome, setShowWelcome] = useState(false);
   // Loader global (affiché lors des actions longues)
   const [globalLoading, setGlobalLoading] = useState(false);
   const [theme, setTheme] = useState('dark');
+  const navigate = useNavigate();
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [feedback, setFeedback] = useState(null); // message de succès/erreur
   useEffect(() => {
     document.body.classList.toggle('light', theme === 'light');
   }, [theme]);
@@ -36,16 +46,62 @@ function App() {
     }
   }, []);
 
+  // Handler pour modifier le profil
+  async function handleEditProfile(data) {
+    setGlobalLoading(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(apiUrl('/api/auth/profile'), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token'),
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Erreur lors de la modification du profil');
+      dispatch(login({ user: result.user, role: result.user.role }));
+      setFeedback({ type: 'success', message: 'Profil modifié avec succès.' });
+      setShowEditProfileModal(false);
+    } catch (e) {
+      setFeedback({ type: 'error', message: e.message });
+    } finally {
+      setGlobalLoading(false);
+    }
+  }
+  // Handler pour changer le mot de passe
+  async function handleChangePassword(data) {
+    setGlobalLoading(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(apiUrl('/api/auth/password'), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token'),
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Erreur lors du changement de mot de passe');
+      setFeedback({ type: 'success', message: 'Mot de passe modifié avec succès.' });
+      setShowChangePasswordModal(false);
+    } catch (e) {
+      setFeedback({ type: 'error', message: e.message });
+    } finally {
+      setGlobalLoading(false);
+    }
+  }
+
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) setNavOpen(false);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (feedback) {
+      const timer = setTimeout(() => setFeedback(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [feedback]);
 
   return (
-    <Router>
       <div
         className="fixed inset-0 min-h-screen w-screen text-white font-sans flex flex-col overflow-hidden"
         style={{
@@ -57,18 +113,18 @@ function App() {
           color: 'var(--text-main)',
         }}
       >
-        {/* Switch mode sombre/clair */}
+        {/* Bouton flottant action principale mobile */}
+        {(user && user.role === 'artist' && location.pathname !== '/upload') && (
         <button
-          className="fixed bottom-6 right-6 z-[300] bg-[#232323] text-accent p-3 rounded-full shadow-lg border-2 border-accent hover:bg-accent hover:text-[#18181b] transition"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          aria-label="Changer le mode sombre/clair"
+          className="fixed bottom-24 right-6 z-[300] bg-[#1DB954] text-black p-5 rounded-full shadow-2xl border-4 border-white/10 hover:bg-red-600 hover:text-white transition text-3xl flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-[#1DB954]/50 md:hidden"
+          aria-label="Uploader une musique"
+          onClick={() => {
+            navigate('/upload');
+          }}
         >
-          {theme === 'dark' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.66-13.66l-.71.71M4.05 19.95l-.71.71M21 12h-1M4 12H3m16.66 5.66l-.71-.71M4.05 4.05l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" /></svg>
-          )}
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
         </button>
+        )}
         {/* Loader plein écran */}
         {globalLoading && (
           <div className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-[200]">
@@ -76,55 +132,11 @@ function App() {
             <div className="loader-message">Chargement…</div>
           </div>
         )}
-        {/* Barre de navigation sticky, bord à bord */}
+        {/* Barre de navigation sticky, bord à bord (desktop uniquement) */}
         <nav className="flex items-center justify-between w-full px-8 py-5 border-b border-white/10 bg-[#18181b]/80 backdrop-blur sticky top-0 z-50 shadow-lg">
           <div className="flex items-center">
             <span className="text-3xl font-extrabold tracking-widest text-accent drop-shadow">RAP2RUE</span>
           </div>
-          {/* Burger menu mobile avec croix de fermeture */}
-          <button className="md:hidden flex items-center px-2 py-1 z-50" onClick={() => setNavOpen(!navOpen)} aria-label="Ouvrir le menu">
-            {navOpen ? (
-              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-          {/* Liens de navigation mobile (sidebar vert, fond plus opaque, boutons plus gros) */}
-          <div
-            className={`
-              fixed md:hidden top-0 right-0 h-full w-2/3 max-w-xs
-              bg-[#101010]/95 shadow-2xl flex flex-col items-center space-y-8 pt-24 transition-transform duration-300 z-40
-              ${navOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : ''}
-              ${!navOpen ? 'translate-x-full opacity-0 pointer-events-none' : ''}
-            `.replace(/\s+/g, ' ')}
-          >
-            <Link to="/" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Accueil</Link>
-            <Link to="/explore" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Explorer</Link>
-            {!user && (
-              <>
-                <Link to="/login" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Connexion</Link>
-                <Link to="/register" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Inscription</Link>
-              </>
-            )}
-            {user && (
-              <>
-                <Link to="/profile" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Profil</Link>
-                <Link to="/library" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Ma bibliothèque</Link>
-                {user.role === 'artist' && (
-                  <>
-                    <Link to="/upload" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Uploader</Link>
-                    <Link to="/dashboard" className="nav-link w-full text-center text-lg py-4" onClick={() => setNavOpen(false)}>Dashboard</Link>
-                  </>
-                )}
-              </>
-            )}
-            <div className="w-full flex justify-center"><UserStatus /></div>
-          </div>
-
           {/* Liens de navigation desktop (navbar horizontale) */}
           <div className="hidden md:flex flex-row items-center space-x-6">
             <Link to="/" className="nav-link text-center">Accueil</Link>
@@ -145,12 +157,13 @@ function App() {
                     <Link to="/dashboard" className="nav-link text-center">Dashboard</Link>
                   </>
                 )}
+                {user.role === 'admin' && (
+                  <Link to="/admin" className="nav-link text-center">Admin</Link>
+                )}
               </>
             )}
             <div className="flex justify-center"><UserStatus /></div>
           </div>
-          {/* Overlay mobile */}
-          {navOpen && <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={() => setNavOpen(false)}></div>}
         </nav>
         {/* Notification popup pour nouveaux visiteurs */}
         {showWelcome && (
@@ -158,8 +171,14 @@ function App() {
             Bienvenue sur RAP2RUE&nbsp;! Découvre, écoute et soutiens le rap.
           </div>
         )}
+        {/* Feedback global */}
+        {feedback && (
+          <div className={`fixed top-20 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg z-[200] font-bold text-lg animate-fade-in ${feedback.type === 'success' ? 'bg-[#1DB954] text-black' : 'bg-red-500 text-white'}`}>
+            {feedback.message}
+          </div>
+        )}
         {/* Routes principales, occupe tout l'espace restant */}
-        <div className="flex-1 w-full h-full overflow-y-auto">
+        <div className="flex-1 w-full h-full overflow-y-auto bg-[#101010] md:bg-transparent rounded-t-3xl md:rounded-none shadow-2xl md:shadow-none mt-2 md:mt-0">
           <Routes>
             <Route path="/" element={<Accueil />} />
             <Route path="/explore" element={<Explore />} />
@@ -167,7 +186,10 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={
               <PrivateRoute>
-                <Profile />
+                <Profile 
+                  onEditProfile={() => setShowEditProfileModal(true)}
+                  onChangePassword={() => setShowChangePasswordModal(true)}
+                />
               </PrivateRoute>
             } />
             <Route path="/library" element={
@@ -190,11 +212,95 @@ function App() {
             {user && user.role === 'admin' && (
               <Route path="/admin" element={<AdminDashboard />} />
             )}
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
           </Routes>
         </div>
+        {/* Bottom bar mobile only, dynamique selon l'état utilisateur */}
+        <nav className="fixed bottom-0 left-0 w-full bg-[#18181b] border-t border-white/10 flex justify-between items-center px-2 py-2 z-50 shadow-2xl md:hidden">
+          <MobileNavLink to="/" label="Accueil" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M3 12l2-2m0 0l7-7 7 7m-9 2v8m0 0h4m-4 0a2 2 0 01-2-2v-4a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2z' /></svg>} />
+          <MobileNavLink to="/explore" label="Explorer" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M12 8v4l3 3' /></svg>} />
+          {!user && (
+            <>
+              <MobileNavLink to="/login" label="Connexion" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M15 12H3m6-6l-6 6 6 6' /></svg>} />
+              <MobileNavLink to="/register" label="Inscription" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' /></svg>} />
+            </>
+          )}
+          {user && (
+            <>
+              <MobileNavLink to="/profile" label="Profil" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M5.121 17.804A13.937 13.937 0 0 1 12 15c2.5 0 4.847.655 6.879 1.804' /><path strokeLinecap='round' strokeLinejoin='round' d='M15 11a3 3 0 1 0-6 0 3 3 0 0 0 6 0z' /></svg>} />
+              <MobileNavLink to="/library" label="Bibliothèque" icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M8 17l4 4 4-4m0-5V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v9m0 0l4 4 4-4' /></svg>} />
+              {user && user.role === 'admin' && (
+                <MobileNavLink to="/admin" label="Admin" icon={
+                  <svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+                    <circle cx="12" cy="12" r="10" stroke="#1DB954" strokeWidth="2" fill="none" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01" />
+                  </svg>
+                } />
+              )}
+              {user && user.role === 'artist' && (
+                <MobileNavLink to="/dashboard" label="Dashboard" icon={
+                  <svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+                    <rect x="3" y="13" width="4" height="8" rx="1" />
+                    <rect x="9" y="9" width="4" height="12" rx="1" />
+                    <rect x="15" y="5" width="4" height="16" rx="1" />
+                  </svg>
+                } />
+              )}
+              <MobileNavAction
+                label="Déconnexion"
+                icon={<svg className='w-6 h-6' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' d='M17 16l4-4m0 0l-4-4m4 4H7' /><path strokeLinecap='round' strokeLinejoin='round' d='M3 12a9 9 0 1 1 18 0 9 9 0 0 1-18 0z' /></svg>}
+                onClick={() => dispatch(logout())}
+              />
+            </>
+          )}
+        </nav>
+        {/* Modale édition profil */}
+        {showEditProfileModal && (
+          <EditProfileModal
+            user={user}
+            onClose={() => setShowEditProfileModal(false)}
+            onSave={handleEditProfile}
+          />
+        )}
+        {/* Modale changement mot de passe */}
+        {showChangePasswordModal && (
+          <ChangePasswordModal
+            onClose={() => setShowChangePasswordModal(false)}
+            onSave={handleChangePassword}
+          />
+        )}
       </div>
-    </Router>
   )
+}
+
+function MobileNavLink({ to, label, icon }) {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+  return (
+    <Link
+      to={to}
+      className={`flex flex-col items-center justify-center flex-1 text-white hover:text-[#1DB954] transition focus:outline-none focus:ring-2 focus:ring-[#1DB954] ${isActive ? 'text-[#1DB954] font-bold' : ''}`}
+    >
+      <span className="text-2xl mb-0.5">{icon}</span>
+      <span className="text-xs font-semibold">{label}</span>
+    </Link>
+  );
+}
+
+function MobileNavAction({ label, icon, onClick, color = '' }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center text-white hover:text-red-500 transition focus:outline-none focus:ring-2 focus:ring-red-500 bg-transparent border-0 ${color}`}
+      aria-label={label}
+      style={{ background: 'transparent' }}
+    >
+      <span className="text-2xl mb-0.5">{icon}</span>
+      <span className="text-xs font-semibold">{label}</span>
+    </button>
+  );
 }
 
 // Composant d'accueil modernisé

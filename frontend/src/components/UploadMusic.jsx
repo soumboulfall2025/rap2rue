@@ -22,6 +22,10 @@ export default function UploadMusic() {
       setError('Tous les champs sont obligatoires.');
       return;
     }
+    if (parseInt(price, 10) < 2000) {
+      setError('Le prix minimum est de 2000 F CFA.');
+      return;
+    }
     setLoading(true);
     if (globalLoading) globalLoading(true);
     // Préparation du formData pour upload
@@ -53,7 +57,7 @@ export default function UploadMusic() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] relative">
       <form onSubmit={handleSubmit} className="bg-[#232323] p-8 rounded-lg shadow-lg w-full max-w-md" encType="multipart/form-data">
         <h2 className="text-2xl font-bold mb-6 text-center">Uploader une musique</h2>
         <div className="mb-4">
@@ -65,8 +69,15 @@ export default function UploadMusic() {
           <input type="text" className="w-full px-3 py-2 rounded bg-[#18181b] border border-accent text-white" value={genre} onChange={e => setGenre(e.target.value)} />
         </div>
         <div className="mb-4">
-          <label className="block mb-1 text-sm">Prix (€)</label>
-          <input type="number" min="0" step="0.01" className="w-full px-3 py-2 rounded bg-[#18181b] border border-accent text-white" value={price} onChange={e => setPrice(e.target.value)} />
+          <label className="block mb-1 text-sm">Prix (F CFA)</label>
+          <input
+            type="number"
+            min="2000"
+            step="1"
+            className="w-full px-3 py-2 rounded bg-[#18181b] border border-accent text-white"
+            value={price}
+            onChange={e => setPrice(e.target.value)}
+          />
         </div>
         <div className="mb-4">
           <label className="block mb-1 text-sm">Description</label>
@@ -86,6 +97,18 @@ export default function UploadMusic() {
           {loading ? 'Upload...' : 'Uploader'}
         </button>
       </form>
+      {/* Bouton flottant pour upload mobile */}
+      <button
+        type="button"
+        onClick={handleSubmit}
+        className="fixed bottom-20 right-6 z-50 bg-accent text-[#18181b] rounded-full shadow-lg p-4 flex items-center justify-center hover:bg-[#1ed760cc] transition md:hidden"
+        style={{ boxShadow: '0 4px 24px 0 rgba(30,215,96,0.2)' }}
+        aria-label="Uploader la musique"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
     </div>
   );
 }

@@ -45,6 +45,7 @@ h1 {
   line-height: 1.1;
 }
 
+/*
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -63,6 +64,7 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+*/
 
 /* Ajout d'un fond gris très foncé, texte blanc, et accent vert fluo pour les liens/boutons */
 body {
@@ -107,7 +109,7 @@ body {
   a:hover {
     color: #747bff;
   }
-  button {
+  /* button {
     background-color: #f9f9f9;
-  }
+  } */
 }

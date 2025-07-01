@@ -63,6 +63,9 @@ router.post('/upload', auth, upload.fields([
     if (!title || !genre || !price || !description || !req.files.cover || !req.files.audio) {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
+    if (parseInt(price, 10) < 2000) {
+      return res.status(400).json({ message: 'Le prix minimum est de 2000 F CFA.' });
+    }
     // Upload cover
     const coverResult = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload(
