@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { apiUrl } from "../utils/api";
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
+import { FaCheckCircle, FaUser, FaVideo, FaClock } from 'react-icons/fa';
+
+const AdminVideoValidation = React.lazy(() => import('./AdminVideoValidation'));
 
 export default function AdminDashboard() {
   const user = useSelector(state => state.user.user);
@@ -188,6 +191,15 @@ export default function AdminDashboard() {
             ))}
           </tbody>
         </table>
+      </div>
+      <h3 className="text-2xl font-bold text-[#1DB954] mt-8 mb-4 flex items-center gap-2">
+        <FaVideo className="inline text-[#1DB954]" /> Validation des vidéos (Reels)
+      </h3>
+      <div className="mb-8">
+        {/* Composant de validation vidéo admin */}
+        <Suspense fallback={<div className="text-accent animate-pulse">Chargement des vidéos…</div>}>
+          <AdminVideoValidation cardStyle />
+        </Suspense>
       </div>
     </div>
   );

@@ -10,12 +10,12 @@ router.use((req, res, next) => {
   next();
 });
 
-// Route publique : feed vidéo façon TikTok (pagination, toutes vidéos)
+// Route publique : feed vidéo façon TikTok (pagination, uniquement vidéos validées)
 router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const videos = await Video.find()
+    const videos = await Video.find({ isValidated: true })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Upload vidéo (artistes uniquement)
+// Upload vidéo (artistes uniquement, non validée par défaut)
 router.post('/', auth, async (req, res) => {
   try {
     const { title, description, url } = req.body;
@@ -38,12 +38,29 @@ router.post('/', auth, async (req, res) => {
       title,
       description,
       url,
-      artist: user._id
+      artist: user._id,
+      isValidated: false
     });
-    console.log('Vidéo créée :', video); // LOG création vidéo
+    console.log('Vidéo créée (en attente validation) :', video);
     res.status(201).json(video);
   } catch (err) {
-    console.error('Erreur upload vidéo :', err); // LOG erreur
+    console.error('Erreur upload vidéo :', err);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// Validation d'une vidéo (admin uniquement)
+router.patch('/:id/validate', auth, async (req, res) => {
+  try {
+    // Vérifie que l'utilisateur est admin
+    const user = await User.findById(req.user.id);
+    if (!user || user.role !== 'admin') return res.status(403).json({ message: 'Seul un admin peut valider.' });
+    const video = await Video.findById(req.params.id);
+    if (!video) return res.status(404).json({ message: 'Vidéo non trouvée.' });
+    video.isValidated = true;
+    await video.save();
+    res.json({ message: 'Vidéo validée.', video });
+  } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
@@ -140,6 +157,22 @@ router.get('/:id/stats', async (req, res) => {
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: 'Vidéo non trouvée.' });
     res.json({ likes: video.likes.length, comments: video.comments.length });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+// Liste toutes les vidéos (admin uniquement, filtrage possible)
+router.get('/all', auth, async (req, res) => {
+  try {
+    // Vérifie que l'utilisateur est admin
+    const user = await User.findById(req.user.id);
+    if (!user || user.role !== 'admin') return res.status(403).json({ message: 'Seul un admin peut accéder à cette liste.' });
+    const filter = {};
+    if (req.query.validated === 'false') filter.isValidated = false;
+    if (req.query.validated === 'true') filter.isValidated = true;
+    const videos = await Video.find(filter).sort({ createdAt: -1 }).populate('artist', 'name avatar');
+    res.json(videos);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }

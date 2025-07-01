@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../utils/api';
 
 export default function UploadVideo({ onUpload }) {
   const [title, setTitle] = useState('');
@@ -22,9 +23,10 @@ export default function UploadVideo({ onUpload }) {
       formData.append('upload_preset', 'Rap2rue'); // preset Cloudinary correct
       const res = await axios.post('https://api.cloudinary.com/v1_1/dtfcsz1km/video/upload', formData);
       const url = res.data.secure_url;
+      console.log('URL Cloudinary envoyée au backend:', url); // LOG DEBUG
       // 2. Envoi au backend
       await axios.post(
-        '/api/video',
+        apiUrl('/api/video'),
         { title, description, url },
         {
           headers: {
