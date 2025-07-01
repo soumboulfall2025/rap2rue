@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
   avatar: { type: String }, // URL ou base64
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
+  googleId: { type: String },
+  facebookId: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

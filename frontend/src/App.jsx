@@ -22,6 +22,7 @@ import EditProfileModal from './components/EditProfileModal';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import SocialCallback from './components/SocialCallback';
 
 function App() {
   const user = useSelector(state => state.user.user);
@@ -214,6 +215,7 @@ function App() {
             )}
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/social-callback" element={<SocialCallback />} />
           </Routes>
         </div>
         {/* Bottom bar mobile only, dynamique selon l'état utilisateur */}

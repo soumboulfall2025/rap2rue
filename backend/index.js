@@ -38,6 +38,9 @@ app.use('/api/payment', paymentRoutes);
 // --- ROUTES ADMIN ---
 app.use('/api/admin', require('./routes/admin'));
 
+const passport = require('./config/passport');
+app.use(passport.initialize());
+
 // ... routes à venir (artistes, musiques, achats, etc.)
 
 const PORT = process.env.PORT || 5000;

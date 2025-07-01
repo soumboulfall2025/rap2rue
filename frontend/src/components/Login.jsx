@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { login } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../utils/api";
+import SocialLoginButtons from "./SocialLoginButtons";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -43,6 +44,7 @@ export default function Login() {
         className="bg-[#232323] p-8 rounded-lg shadow-lg w-full max-w-sm"
       >
         <h2 className="text-2xl font-bold mb-6 text-center">Connexion</h2>
+        <SocialLoginButtons />
         <div className="mb-4">
           <label className="block mb-1 text-sm" htmlFor="email">
             Email

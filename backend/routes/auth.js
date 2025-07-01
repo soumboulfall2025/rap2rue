@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const { sendMail } = require('../utils/mailer');
+const passport = require('../config/passport');
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const router = express.Router();
 
@@ -151,6 +153,35 @@ router.post('/reset-password/:token', async (req, res) => {
   user.resetPasswordExpires = undefined;
   await user.save();
   res.json({ message: 'Mot de passe réinitialisé.' });
+});
+
+// Google
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', passport.authenticate('google', { session: false, failureRedirect: FRONTEND_URL + '/login' }),
+  (req, res) => {
+    const token = jwt.sign({ id: req.user._id, role: req.user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.redirect(`${FRONTEND_URL}/social-callback?token=${token}`);
+  }
+);
+
+// Facebook
+router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+router.get('/facebook/callback', passport.authenticate('facebook', { session: false, failureRedirect: FRONTEND_URL + '/login' }),
+  (req, res) => {
+    const token = jwt.sign({ id: req.user._id, role: req.user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.redirect(`${FRONTEND_URL}/social-callback?token=${token}`);
+  }
+);
+
+// Route pour récupérer le profil utilisateur à partir du JWT
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password -resetPasswordToken -resetPasswordExpires');
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
 });
 
 module.exports = router;

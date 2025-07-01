@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { login } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../utils/api";
+import SocialLoginButtons from "./SocialLoginButtons";
 
 export default function Register() {
   const [role, setRole] = useState("fan");
@@ -44,6 +45,7 @@ export default function Register() {
         className="bg-[#232323] p-8 rounded-lg shadow-lg w-full max-w-sm"
       >
         <h2 className="text-2xl font-bold mb-6 text-center">Inscription</h2>
+        <SocialLoginButtons />
         <div className="mb-4 flex justify-center space-x-4">
           <button
             type="button"
