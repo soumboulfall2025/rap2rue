@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { apiUrl } from '../utils/api';
 import { io } from 'socket.io-client';
-import MusicCard from './MusicCard';
 
 export default function Profile({ onEditProfile, onChangePassword, profileUser }) {
   const { user, role, isAuthenticated } = useSelector((state) => state.user);
@@ -15,7 +14,6 @@ export default function Profile({ onEditProfile, onChangePassword, profileUser }
   const [followed, setFollowed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState(null);
-  const [musics, setMusics] = useState([]);
 
   useEffect(() => {
     if (!user || user.role !== 'artist') return;
@@ -42,29 +40,6 @@ export default function Profile({ onEditProfile, onChangePassword, profileUser }
     socket.on('artist_follow', handleFollow);
     return () => socket.off('artist_follow', handleFollow);
   }, [socket, user]);
-
-  // Récupérer les musiques de l'artiste affiché
-  useEffect(() => {
-    if (!displayedUser || displayedUser.role !== 'artist') return;
-    axios.get(apiUrl(`/api/music?artist=${displayedUser._id}`))
-      .then(res => setMusics(res.data))
-      .catch(() => setMusics([]));
-  }, [displayedUser]);
-
-  // Temps réel : écoute l'event music_uploaded
-  useEffect(() => {
-    if (!socket || !displayedUser || displayedUser.role !== 'artist') return;
-    const handleMusicUpload = (data) => {
-      if (data.artistId === displayedUser._id) {
-        // Rafraîchir la liste
-        axios.get(apiUrl(`/api/music?artist=${displayedUser._id}`))
-          .then(res => setMusics(res.data))
-          .catch(() => setMusics([]));
-      }
-    };
-    socket.on('music_uploaded', handleMusicUpload);
-    return () => socket.off('music_uploaded', handleMusicUpload);
-  }, [socket, displayedUser]);
 
   const handleFollow = async () => {
     if (!user) return;
@@ -123,29 +98,10 @@ export default function Profile({ onEditProfile, onChangePassword, profileUser }
             <div className="text-xs text-gray-400">Achats</div>
           </div>
           <div className="text-center flex-1">
-            <div className="text-xl font-bold text-accent">{displayedUser.role === 'artist' ? musics.length : 0}</div>
+            <div className="text-xl font-bold text-accent">{displayedUser.role === 'artist' ? displayedUser.musicCount || 0 : 0}</div>
             <div className="text-xs text-gray-400">Musiques uploadées</div>
           </div>
         </div>
-        {/* Liste des musiques uploadées par l'artiste */}
-        {displayedUser.role === 'artist' && (
-          <div className="w-full mt-8">
-            <h3 className="text-lg font-bold text-accent mb-2">Musiques uploadées</h3>
-            {musics.length === 0 ? (
-              <div className="text-gray-400 text-sm">Aucune musique publiée.</div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {musics.map(music => (
-                  <MusicCard key={music._id} music={{
-                    ...music,
-                    artist: displayedUser.name,
-                    artistId: displayedUser._id,
-                  }} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

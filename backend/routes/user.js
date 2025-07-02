@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/User');
+const Music = require('../models/Music');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
@@ -47,7 +48,11 @@ router.get('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé.' });
-    res.json({ user });
+    let musicCount = 0;
+    if (user.role === 'artist') {
+      musicCount = await Music.countDocuments({ artist: user._id });
+    }
+    res.json({ user: { ...user.toObject(), musicCount } });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
