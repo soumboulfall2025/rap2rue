@@ -84,12 +84,7 @@ export default function VideoSocialActions({ video }) {
     try {
       await axios.post(`/api/video/${videoId}/comment`, { text: comment }, { headers: { Authorization: 'Bearer ' + token } });
       setComment('');
-      const res = await axios.get(`/api/video/${videoId}/comments`);
-      const commentsArray = Array.isArray(res.data) ? res.data : [];
-      setComments(commentsArray);
-      setStats(s => ({ ...s, comments: commentsArray.length }));
-      // Émet l'event comment (le backend doit aussi le faire pour tous)
-      if (socket) socket.emit('video_comment', { videoId, comments: commentsArray });
+      // On ne fait plus de GET ici, on attend l'event temps réel
     } finally {
       setLoading(false);
     }
@@ -107,9 +102,9 @@ export default function VideoSocialActions({ video }) {
         >
           <span className={`transition-transform duration-300 ${animLike ? 'scale-125' : ''}`}>
             {/* Cœur SVG animé */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={liked ? '#1DB954' : 'none'} stroke="#fff" strokeWidth="2" className={`w-10 h-10 drop-shadow-lg ${liked ? 'animate-pulse' : ''}`}><path strokeLinecap="round" strokeLinejoin="round" d="M12 21C12 21 4 13.5 4 8.5C4 5.5 6.5 3 9.5 3C11.04 3 12.5 3.99 13.07 5.36C13.64 3.99 15.1 3 16.64 3C19.64 3 22.14 5.5 22.14 8.5C22.14 13.5 12 21 12 21Z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={liked ? '#1DB954' : 'none'} stroke={liked ? '#1DB954' : '#fff'} strokeWidth="2" className={`w-10 h-10 drop-shadow-lg ${liked ? 'animate-pulse' : ''}`}> <path strokeLinecap="round" strokeLinejoin="round" d="M12 21C12 21 4 13.5 4 8.5C4 5.5 6.5 3 9.5 3C11.04 3 12.5 3.99 13.07 5.36C13.64 3.99 15.1 3 16.64 3C19.64 3 22.14 5.5 22.14 8.5C22.14 13.5 12 21 12 21Z" /></svg>
           </span>
-          <span className="text-white font-bold text-lg mt-1 drop-shadow-lg">{stats.likes}</span>
+          <span className="text-[#1DB954] font-bold text-lg mt-1 drop-shadow-lg">{stats.likes}</span>
         </button>
         {/* Commentaires */}
         <button
