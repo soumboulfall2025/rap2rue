@@ -66,6 +66,11 @@ router.post('/upload', auth, upload.fields([
     if (parseInt(price, 10) < 2000) {
       return res.status(400).json({ message: 'Le prix minimum est de 2000 F CFA.' });
     }
+    // Vérification que l'utilisateur est bien un artiste
+    const artist = await User.findById(req.user.id);
+    if (!artist || artist.role !== 'artist') {
+      return res.status(400).json({ message: 'Seuls les artistes peuvent uploader des musiques.' });
+    }
     // Upload cover
     const coverResult = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload(

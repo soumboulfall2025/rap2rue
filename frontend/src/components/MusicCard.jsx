@@ -81,7 +81,7 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
           </Link>
           {/* Affiche le bouton s'abonner si l'artiste a un id et ce n'est pas l'utilisateur connecté, sans compteur */}
           {music.artistId && (!music.currentUserId || music.artistId !== music.currentUserId) && (
-            <ArtistFollowButton artistId={music.artistId} hideCount={true} />
+            <ArtistFollowButton key={music.artistId} artistId={music.artistId} hideCount={true} />
           )}
         </div>
         {price && <div className="text-accent font-semibold mt-1">{price} F CFA</div>}
