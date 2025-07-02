@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   googleId: { type: String },
   facebookId: { type: String },
   roleSet: { type: Boolean, default: false },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

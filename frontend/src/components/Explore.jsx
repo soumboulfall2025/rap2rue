@@ -65,6 +65,8 @@ export default function Explore() {
               cover: music.coverUrl,
               title: music.title,
               artist: music.artist?.name || 'Inconnu',
+              artistId: music.artist?._id, // Ajout de l'id artiste
+              currentUserId: user?._id, // Pour ne pas afficher le bouton sur soi-même
               price: music.price,
               description: music.description,
               isBought: user?.library?.includes(music._id) || false,

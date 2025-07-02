@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import BuyMusicButton from './BuyMusicButton';
+import ArtistFollowButton from './ArtistFollowButton';
 
 /**
  * Card musique façon Spotify
@@ -73,7 +74,13 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
       </div>
       <div className="text-white text-center w-full">
         <div className="font-bold text-lg truncate" title={music.title}>{music.title}</div>
-        <div className="text-gray-400 text-sm truncate" title={music.artist}>{music.artist}</div>
+        <div className="text-gray-400 text-sm truncate flex items-center gap-2" title={music.artist}>
+          {music.artist}
+          {/* Affiche le bouton s'abonner si l'artiste a un id et ce n'est pas l'utilisateur connecté */}
+          {music.artistId && (!music.currentUserId || music.artistId !== music.currentUserId) && (
+            <ArtistFollowButton artistId={music.artistId} hideCount={false} />
+          )}
+        </div>
         {price && <div className="text-accent font-semibold mt-1">{price} F CFA</div>}
         {description && <div className="text-xs text-gray-400 mt-1 line-clamp-2">{description}</div>}
       </div>

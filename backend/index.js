@@ -22,6 +22,7 @@ const authRoutes = require('./routes/auth');
 const musicRoutes = require('./routes/music');
 const paymentRoutes = require('./routes/payment');
 const videoRoutes = require('./routes/video');
+const userRoutes = require('./routes/user');
 const allowedOrigins = [
   'http://localhost:5173',
   'https://rap2rue-frontend.onrender.com'
@@ -50,6 +51,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/music', musicRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/video', videoRoutes);
+app.use('/api/user', userRoutes);
 // --- ROUTES ADMIN ---
 app.use('/api/admin', require('./routes/admin'));
 
