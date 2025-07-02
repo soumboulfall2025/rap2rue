@@ -148,6 +148,7 @@ export default function VideoFeed() {
               if (current < videos.length - 1) setCurrent(c => c + 1);
               else setCurrent(0);
             }}
+            onError={() => alert('Erreur de lecture vidéo !\nVérifie le format ou l’URL Cloudinary.')}
           />
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-full p-8">
