@@ -123,7 +123,7 @@ export default function Profile({ onEditProfile, onChangePassword, profileUser }
             <div className="text-xs text-gray-400">Achats</div>
           </div>
           <div className="text-center flex-1">
-            <div className="text-xl font-bold text-accent">0</div>
+            <div className="text-xl font-bold text-accent">{displayedUser.role === 'artist' ? musics.length : 0}</div>
             <div className="text-xs text-gray-400">Musiques uploadées</div>
           </div>
         </div>
