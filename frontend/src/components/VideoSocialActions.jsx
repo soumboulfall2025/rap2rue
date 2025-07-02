@@ -126,7 +126,7 @@ export default function VideoSocialActions({ video }) {
       {/* Overlay commentaires slide-in */}
       {showComments && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="bg-black/90 w-full sm:w-[400px] h-full p-6 flex flex-col animate-slidein-right relative">
+          <div className="bg-[#1DB954]/95 w-full sm:w-[400px] h-full p-6 flex flex-col animate-slidein-right relative shadow-2xl">
             <button
               className="absolute top-4 right-4 text-white text-2xl hover:text-red-500"
               onClick={() => setShowComments(false)}
@@ -137,15 +137,16 @@ export default function VideoSocialActions({ video }) {
             <h3 className="text-xl font-bold mb-4 text-white">Commentaires</h3>
             <div className="flex-1 overflow-y-auto space-y-3 pr-2">
               {(Array.isArray(comments) ? comments : []).map((c, i) => (
-                <div key={i} className="text-sm text-gray-200 border-b border-gray-700 pb-2">
-                  <span className="font-bold text-accent">{c.user?.name || 'Utilisateur'}</span> : {c.text}
+                <div key={i} className="text-sm text-white border-b border-white/30 pb-2 flex items-center gap-2">
+                  <svg xmlns='http://www.w3.org/2000/svg' fill="#1DB954" viewBox='0 0 24 24' stroke="#1DB954" strokeWidth="2" className="w-5 h-5 mr-1"><path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
+                  <span className="font-bold text-white">{c.user?.name || 'Utilisateur'}</span> : {c.text}
                 </div>
               ))}
-              {comments.length === 0 && <div className="text-gray-400">Aucun commentaire</div>}
+              {comments.length === 0 && <div className="text-white/80">Aucun commentaire</div>}
             </div>
             <form onSubmit={handleComment} className="mt-4 flex gap-2">
-              <input value={comment} onChange={e => setComment(e.target.value)} className="border border-gray-700 rounded p-2 flex-1 bg-black/80 text-white placeholder-gray-400" placeholder="Ajouter un commentaire..." />
-              <button type="submit" className="bg-accent text-white px-4 py-2 rounded" disabled={loading}>Envoyer</button>
+              <input value={comment} onChange={e => setComment(e.target.value)} className="border border-white/30 rounded p-2 flex-1 bg-[#1DB954]/30 text-white placeholder-white/70" placeholder="Ajouter un commentaire..." />
+              <button type="submit" className="bg-white text-[#1DB954] px-4 py-2 rounded font-bold" disabled={loading}>Envoyer</button>
             </form>
           </div>
           {/* Fond noir semi-transparent pour fermer */}
