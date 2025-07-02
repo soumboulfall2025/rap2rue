@@ -71,9 +71,21 @@ export default function ArtistFollowButton({ artistId, initialFollowers = 0, isF
       <button
         onClick={handleFollow}
         disabled={loading}
-        className={`px-3 py-1 rounded-full font-bold shadow text-xs transition ${followed ? 'bg-white text-[#1db954]' : 'bg-[#1db954] text-white'}`}
+        className={`rounded-full p-2 shadow text-xs flex items-center justify-center transition focus:outline-none ${followed ? 'bg-white text-[#1db954] border border-[#1db954]' : 'bg-[#1db954] text-white'} ${loading ? 'opacity-60' : ''}`}
+        title={followed ? 'Se désabonner' : 'S’abonner'}
+        aria-label={followed ? 'Se désabonner' : 'S’abonner'}
       >
-        {followed ? 'Abonné' : 'S’abonner'}
+        {followed ? (
+          // Icône check (abonné)
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#1db954" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        ) : (
+          // Icône plus (s’abonner)
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        )}
       </button>
       {!hideCount && (
         <span className="text-white/80 text-xs">{followers} abonné{followers > 1 ? 's' : ''}</span>
