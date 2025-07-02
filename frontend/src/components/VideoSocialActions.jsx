@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { apiUrl } from '../utils/api';
 
 export default function VideoSocialActions({ video }) {
   const videoId = video?._id;
@@ -22,12 +23,12 @@ export default function VideoSocialActions({ video }) {
 
   useEffect(() => {
     if (!videoId) return;
-    axios.get(`/api/video/${videoId}/stats`).then(res => setStats(res.data));
-    axios.get(`/api/video/${videoId}/comments`).then(res => setComments(Array.isArray(res.data) ? res.data : []));
+    axios.get(apiUrl(`/api/video/${videoId}/stats`)).then(res => setStats(res.data));
+    axios.get(apiUrl(`/api/video/${videoId}/comments`)).then(res => setComments(Array.isArray(res.data) ? res.data : []));
     // Vérifie si l'utilisateur a liké (simple, à améliorer avec le backend si besoin)
     const token = localStorage.getItem('token');
     if (token) {
-      axios.get(`/api/video/my`, { headers: { Authorization: 'Bearer ' + token } })
+      axios.get(apiUrl(`/api/video/my`), { headers: { Authorization: 'Bearer ' + token } })
         .then(res => {
           const list = Array.isArray(res.data) ? res.data : [];
           const v = list.find(v => v._id === videoId);
@@ -63,7 +64,7 @@ export default function VideoSocialActions({ video }) {
     if (!token) return alert('Connecte-toi pour liker');
     setLoading(true);
     try {
-      const res = await axios.post(`/api/video/${videoId}/like`, {}, { headers: { Authorization: 'Bearer ' + token } });
+      const res = await axios.post(apiUrl(`/api/video/${videoId}/like`), {}, { headers: { Authorization: 'Bearer ' + token } });
       setLiked(res.data.liked);
       setStats(s => ({ ...s, likes: res.data.likes }));
       setAnimLike(true);
@@ -82,7 +83,7 @@ export default function VideoSocialActions({ video }) {
     if (!comment.trim()) return;
     setLoading(true);
     try {
-      await axios.post(`/api/video/${videoId}/comment`, { text: comment }, { headers: { Authorization: 'Bearer ' + token } });
+      await axios.post(apiUrl(`/api/video/${videoId}/comment`), { text: comment }, { headers: { Authorization: 'Bearer ' + token } });
       setComment('');
       // On ne fait plus de GET ici, on attend l'event temps réel
     } finally {
