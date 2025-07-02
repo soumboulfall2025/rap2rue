@@ -152,7 +152,10 @@ export default function VideoFeed() {
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-full p-8">
             <div className="text-red-500 text-lg font-bold mb-2">Vidéo non disponible ou format non supporté</div>
-            <div className="text-xs break-all text-gray-400">{video.url ? video.url : 'Aucune URL vidéo trouvée.'}</div>
+            <div className="text-xs break-all text-gray-400 mb-2">{video.url ? video.url : 'Aucune URL vidéo trouvée.'}</div>
+            {video.url && (
+              <a href={video.url} target="_blank" rel="noopener noreferrer" className="text-accent underline text-sm">Tester la vidéo dans un nouvel onglet</a>
+            )}
           </div>
         )}
         {user && user.role !== 'admin' && isValidUrl && (
