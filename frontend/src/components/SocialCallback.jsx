@@ -31,7 +31,7 @@ export default function SocialCallback() {
         .then((data) => {
           if (data && data.user) {
             setUser(data.user);
-            if (!data.user.role || !["fan", "artist"].includes(data.user.role)) {
+            if (!data.user.roleSet) {
               setNeedRole(true);
             } else {
               dispatch(login({ user: data.user, role: data.user.role }));

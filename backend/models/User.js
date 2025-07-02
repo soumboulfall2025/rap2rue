@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: { type: Date },
   googleId: { type: String },
   facebookId: { type: String },
+  roleSet: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
