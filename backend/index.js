@@ -1,6 +1,19 @@
 // Backend Express de RAP2RUE
 const express = require('express');
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server, {
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'https://rap2rue-frontend.onrender.com'
+    ],
+    credentials: true
+  }
+});
+app.set('io', io);
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
@@ -10,8 +23,8 @@ const musicRoutes = require('./routes/music');
 const paymentRoutes = require('./routes/payment');
 const videoRoutes = require('./routes/video');
 const allowedOrigins = [
-  'http://localhost:5173', // ton frontend local
-  'https://rap2rue-frontend.onrender.com' // ton frontend déployé
+  'http://localhost:5173',
+  'https://rap2rue-frontend.onrender.com'
 ];
 
 app.use(cors({
