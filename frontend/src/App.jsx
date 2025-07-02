@@ -276,7 +276,6 @@ function App() {
             onSave={handleChangePassword}
           />
         )}
-        <VideoFeed />
       </div>
   )
 }

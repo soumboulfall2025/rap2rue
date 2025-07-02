@@ -116,15 +116,19 @@ router.post('/:id/like', auth, async (req, res) => {
     if (!video) return res.status(404).json({ message: 'Vidéo non trouvée.' });
     const userId = req.user.id;
     const index = video.likes.findIndex(id => id.toString() === userId);
+    let liked;
     if (index === -1) {
       video.likes.push(userId);
-      await video.save();
-      return res.json({ liked: true, likes: video.likes.length });
+      liked = true;
     } else {
       video.likes.splice(index, 1);
-      await video.save();
-      return res.json({ liked: false, likes: video.likes.length });
+      liked = false;
     }
+    await video.save();
+    // Émission temps réel
+    const io = req.app.get('io');
+    io.emit('video_like', { videoId: video._id.toString(), likes: video.likes.length });
+    return res.json({ liked, likes: video.likes.length });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
@@ -135,10 +139,14 @@ router.post('/:id/comment', auth, async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) return res.status(400).json({ message: 'Commentaire requis.' });
-    const video = await Video.findById(req.params.id);
+    const video = await Video.findById(req.params.id).populate('comments.user', 'name avatar');
     if (!video) return res.status(404).json({ message: 'Vidéo non trouvée.' });
     video.comments.push({ user: req.user.id, text });
     await video.save();
+    // On repopule pour avoir le user du dernier commentaire
+    await video.populate('comments.user', 'name avatar');
+    const io = req.app.get('io');
+    io.emit('video_comment', { videoId: video._id.toString(), comments: video.comments });
     res.status(201).json(video.comments[video.comments.length - 1]);
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });

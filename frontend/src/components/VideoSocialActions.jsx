@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 export default function VideoSocialActions({ video }) {
   const videoId = video?._id;
@@ -10,6 +11,14 @@ export default function VideoSocialActions({ video }) {
   const [loading, setLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [animLike, setAnimLike] = useState(false);
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    // Connexion socket.io côté client
+    const s = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000');
+    setSocket(s);
+    return () => s.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!videoId) return;
@@ -27,6 +36,28 @@ export default function VideoSocialActions({ video }) {
     }
   }, [videoId]);
 
+  // Réception des events temps réel
+  useEffect(() => {
+    if (!socket || !videoId) return;
+    const handleLike = (data) => {
+      if (data.videoId === videoId) {
+        setStats(s => ({ ...s, likes: data.likes }));
+      }
+    };
+    const handleComment = (data) => {
+      if (data.videoId === videoId) {
+        setComments(data.comments);
+        setStats(s => ({ ...s, comments: data.comments.length }));
+      }
+    };
+    socket.on('video_like', handleLike);
+    socket.on('video_comment', handleComment);
+    return () => {
+      socket.off('video_like', handleLike);
+      socket.off('video_comment', handleComment);
+    };
+  }, [socket, videoId]);
+
   const handleLike = async () => {
     const token = localStorage.getItem('token');
     if (!token) return alert('Connecte-toi pour liker');
@@ -37,6 +68,8 @@ export default function VideoSocialActions({ video }) {
       setStats(s => ({ ...s, likes: res.data.likes }));
       setAnimLike(true);
       setTimeout(() => setAnimLike(false), 600);
+      // Émet l'event like (le backend doit aussi le faire pour tous)
+      if (socket) socket.emit('video_like', { videoId, likes: res.data.likes });
     } finally {
       setLoading(false);
     }
@@ -55,6 +88,8 @@ export default function VideoSocialActions({ video }) {
       const commentsArray = Array.isArray(res.data) ? res.data : [];
       setComments(commentsArray);
       setStats(s => ({ ...s, comments: commentsArray.length }));
+      // Émet l'event comment (le backend doit aussi le faire pour tous)
+      if (socket) socket.emit('video_comment', { videoId, comments: commentsArray });
     } finally {
       setLoading(false);
     }
@@ -72,7 +107,7 @@ export default function VideoSocialActions({ video }) {
         >
           <span className={`transition-transform duration-300 ${animLike ? 'scale-125' : ''}`}>
             {/* Cœur SVG animé */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={liked ? '#ef4444' : 'none'} stroke="#fff" strokeWidth="2" className={`w-10 h-10 drop-shadow-lg ${liked ? 'animate-pulse' : ''}`}> <path strokeLinecap="round" strokeLinejoin="round" d="M12 21C12 21 4 13.5 4 8.5C4 5.5 6.5 3 9.5 3C11.04 3 12.5 3.99 13.07 5.36C13.64 3.99 15.1 3 16.64 3C19.64 3 22.14 5.5 22.14 8.5C22.14 13.5 12 21 12 21Z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={liked ? '#1DB954' : 'none'} stroke="#fff" strokeWidth="2" className={`w-10 h-10 drop-shadow-lg ${liked ? 'animate-pulse' : ''}`}><path strokeLinecap="round" strokeLinejoin="round" d="M12 21C12 21 4 13.5 4 8.5C4 5.5 6.5 3 9.5 3C11.04 3 12.5 3.99 13.07 5.36C13.64 3.99 15.1 3 16.64 3C19.64 3 22.14 5.5 22.14 8.5C22.14 13.5 12 21 12 21Z" /></svg>
           </span>
           <span className="text-white font-bold text-lg mt-1 drop-shadow-lg">{stats.likes}</span>
         </button>

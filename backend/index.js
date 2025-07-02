@@ -49,9 +49,14 @@ const PORT = process.env.PORT || 5000;
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    app.listen(PORT, () => console.log(`Serveur backend lancé sur le port ${PORT}`));
+    server.listen(PORT, () => console.log(`Serveur backend + WebSocket lancé sur le port ${PORT}`));
   })
   .catch(err => console.error('Erreur MongoDB :', err));
+
+// Socket.IO events de base (optionnel)
+io.on('connection', (socket) => {
+  console.log('Client connecté au WebSocket');
+});
 
 // --- UX MOBILE : loader plein écran lors des actions importantes ---
 // Ajout d'un composant Loader global (à placer dans App.jsx ou un composant Layout)
