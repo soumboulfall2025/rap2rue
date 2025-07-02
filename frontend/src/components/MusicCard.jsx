@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import BuyMusicButton from './BuyMusicButton';
 import ArtistFollowButton from './ArtistFollowButton';
 
@@ -75,10 +76,12 @@ export default function MusicCard({ music, onPlay, onLike, liked, onPause, isAct
       <div className="text-white text-center w-full">
         <div className="font-bold text-lg truncate" title={music.title}>{music.title}</div>
         <div className="text-gray-400 text-sm truncate flex items-center gap-2" title={music.artist}>
-          {music.artist}
-          {/* Affiche le bouton s'abonner si l'artiste a un id et ce n'est pas l'utilisateur connecté */}
+          <Link to={music.artistId ? `/artist/${music.artistId}` : '#'} className="hover:underline hover:text-accent font-semibold">
+            {music.artist}
+          </Link>
+          {/* Affiche le bouton s'abonner si l'artiste a un id et ce n'est pas l'utilisateur connecté, sans compteur */}
           {music.artistId && (!music.currentUserId || music.artistId !== music.currentUserId) && (
-            <ArtistFollowButton artistId={music.artistId} hideCount={false} />
+            <ArtistFollowButton artistId={music.artistId} hideCount={true} />
           )}
         </div>
         {price && <div className="text-accent font-semibold mt-1">{price} F CFA</div>}

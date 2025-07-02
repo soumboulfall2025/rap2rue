@@ -24,6 +24,7 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import SocialCallback from './components/SocialCallback';
 import VideoFeed from './components/VideoFeed';
+import ArtistProfilePage from './components/ArtistProfilePage';
 
 function App() {
   const user = useSelector(state => state.user.user);
@@ -219,6 +220,7 @@ function App() {
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/social-callback" element={<SocialCallback />} />
             <Route path="/reels" element={<VideoFeed />} />
+            <Route path="/artist/:id" element={<ArtistProfilePage />} />
           </Routes>
         </div>
         {/* Bottom bar mobile only, dynamique selon l'état utilisateur */}
