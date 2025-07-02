@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import ReactPlayer from 'react-player';
 import axios from 'axios';
 import VideoSocialActions from './VideoSocialActions';
 import { useSelector } from 'react-redux';
@@ -135,21 +134,16 @@ export default function VideoFeed() {
       {/* Lecteur vidéo principal */}
       <div className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl mb-4 relative min-h-[300px] flex items-center justify-center">
         {isValidUrl ? (
-          <ReactPlayer
+          <video
             key={video._id || video.url}
-            url={video.url}
-            className="react-player"
-            playing={true}
-            muted={true} // Toujours muted pour autoplay sans erreur navigateur
-            controls={false} // TikTok: pas de contrôles natifs
-            width="100%"
-            height="auto"
-            onEnded={() => {
-              if (current < videos.length - 1) setCurrent(c => c + 1);
-              else setCurrent(0);
-            }}
-            onError={() => alert('Erreur de lecture vidéo !\nVérifie le format ou l’URL Cloudinary.')}
-          />
+            src={video.url}
+            controls
+            autoPlay
+            muted
+            style={{ width: '100%', maxHeight: 500, background: 'black' }}
+          >
+            Votre navigateur ne supporte pas la lecture vidéo.
+          </video>
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-full p-8">
             <div className="text-red-500 text-lg font-bold mb-2">Vidéo non disponible ou format non supporté</div>
@@ -157,13 +151,6 @@ export default function VideoFeed() {
             {video.url && (
               <a href={video.url} target="_blank" rel="noopener noreferrer" className="text-accent underline text-sm">Tester la vidéo dans un nouvel onglet</a>
             )}
-          </div>
-        )}
-        {user && user.role !== 'admin' && isValidUrl && (
-          <div className="absolute top-4 right-4 z-20">
-            <span className="bg-black/70 text-white px-3 py-1 rounded-full text-xs">
-              Appuyez sur l'icône son pour activer l'audio
-            </span>
           </div>
         )}
         {/* Overlay TikTok social actions */}
