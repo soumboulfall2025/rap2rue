@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { apiUrl } from '../utils/api';
+import { useSelector } from 'react-redux';
 
 /**
  * Bouton d'abonnement artiste avec compteur d'abonnés temps réel
  * Props : artistId, initialFollowers, isFollowed, hideCount (optionnel)
  */
 export default function ArtistFollowButton({ artistId, initialFollowers = 0, isFollowed = false, hideCount = false }) {
+  const { user } = useSelector(state => state.user) || {};
   const [followers, setFollowers] = useState(initialFollowers);
   const [followed, setFollowed] = useState(isFollowed);
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,24 @@ export default function ArtistFollowButton({ artistId, initialFollowers = 0, isF
     socket.on('artist_follow', handleFollow);
     return () => socket.off('artist_follow', handleFollow);
   }, [socket, artistId]);
+
+  // Vérifie si l'utilisateur courant suit déjà l'artiste au montage
+  useEffect(() => {
+    async function checkFollow() {
+      const token = localStorage.getItem('token');
+      if (!artistId || !token) return;
+      try {
+        const res = await axios.get(apiUrl(`/api/user/${artistId}`), { headers: { Authorization: 'Bearer ' + token } });
+        const artist = res.data.user;
+        if (artist && Array.isArray(artist.followers)) {
+          const myId = user?._id || JSON.parse(atob(token.split('.')[1])).id;
+          setFollowed(artist.followers.includes(myId));
+          setFollowers(artist.followers.length);
+        }
+      } catch {}
+    }
+    checkFollow();
+  }, [artistId, user]);
 
   const handleFollow = async () => {
     setLoading(true);
