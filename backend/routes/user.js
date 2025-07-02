@@ -9,6 +9,9 @@ router.post('/:id/follow', auth, async (req, res) => {
     const artist = await User.findById(req.params.id);
     if (!artist || artist.role !== 'artist') return res.status(404).json({ message: 'Artiste non trouvé.' });
     const userId = req.user.id;
+    if (artist._id.toString() === userId) {
+      return res.status(400).json({ message: 'Vous ne pouvez pas vous abonner à vous-même.' });
+    }
     const index = artist.followers.findIndex(id => id.toString() === userId);
     let followed;
     if (index === -1) {
