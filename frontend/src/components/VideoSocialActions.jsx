@@ -15,7 +15,7 @@ export default function VideoSocialActions({ video }) {
 
   useEffect(() => {
     // Connexion socket.io côté client
-    const s = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000');
+    const s = io(import.meta.env.VITE_REACT_APP_SOCKET_URL || 'http://localhost:5000');
     setSocket(s);
     return () => s.disconnect();
   }, []);
