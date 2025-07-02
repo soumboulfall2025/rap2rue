@@ -24,6 +24,7 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import SocialCallback from './components/SocialCallback';
 import VideoFeed from './components/VideoFeed';
+import TestPlayer from './components/TestPlayer';
 
 function App() {
   const user = useSelector(state => state.user.user);
@@ -276,6 +277,7 @@ function App() {
             onSave={handleChangePassword}
           />
         )}
+        <TestPlayer />
       </div>
   )
 }
