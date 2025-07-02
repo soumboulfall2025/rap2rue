@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { apiUrl } from '../utils/api';
 import { io } from 'socket.io-client';
+import useArtistMusicCount from './useArtistMusicCount';
 
 export default function Profile({ onEditProfile, onChangePassword, profileUser }) {
   const { user, role, isAuthenticated } = useSelector((state) => state.user);
@@ -54,6 +55,9 @@ export default function Profile({ onEditProfile, onChangePassword, profileUser }
     }
   };
 
+  // Hook pour compter dynamiquement les musiques si c'est son propre profil artiste
+  const dynamicMusicCount = (isOwnProfile && displayedUser.role === 'artist') ? useArtistMusicCount(displayedUser._id) : null;
+
   if (!isAuthenticated) {
     return <div className="text-center mt-10 text-lg">Veuillez vous connecter pour accéder à votre profil.</div>;
   }
@@ -98,7 +102,7 @@ export default function Profile({ onEditProfile, onChangePassword, profileUser }
             <div className="text-xs text-gray-400">Achats</div>
           </div>
           <div className="text-center flex-1">
-            <div className="text-xl font-bold text-accent">{displayedUser.role === 'artist' ? displayedUser.musicCount || 0 : 0}</div>
+            <div className="text-xl font-bold text-accent">{displayedUser.role === 'artist' ? (isOwnProfile ? dynamicMusicCount : (displayedUser.musicCount || 0)) : 0}</div>
             <div className="text-xs text-gray-400">Musiques uploadées</div>
           </div>
         </div>
